@@ -1,0 +1,6 @@
+{
+  "name": "Bareey",
+  "description": "Buy. Sell. Offer Services. The trusted all-in-one marketplace with secure escrow payments and instant chat.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
