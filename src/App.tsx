@@ -3,777 +3,660 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  ShoppingBag, Briefcase, MessageSquare, User, Search, Filter, 
-  MapPin, AlertCircle, RefreshCw, Sparkles, ChevronRight, ShieldAlert 
+  ShieldCheck, ShoppingBag, Briefcase, MessageSquare, User, 
+  Search, Bell, Sparkles, AlertCircle, RefreshCw, X, ChevronRight,
+  Info, ShieldAlert, ArrowRight
 } from 'lucide-react';
 
-import { Product, Service, Chat, Message } from './types';
-import { fetchProductsSimulated } from './lib/api/products';
-import { fetchServicesSimulated } from './lib/api/services';
-
-// Components
 import Navbar from './lib/components/Navbar';
-import BottomNavigation from './lib/components/BottomNavigation';
 import HeroBanner from './lib/components/HeroBanner';
-import LoadingSkeleton from './lib/components/LoadingSkeleton';
-import EmptyState from './lib/components/EmptyState';
-import SectionHeader from './lib/components/SectionHeader';
 import ProductCard from './lib/components/ProductCard';
 import ServiceCard from './lib/components/ServiceCard';
-import { ChatCategoryCard, ChatThreadRow } from './lib/components/ChatPreviewCard';
 import ChatWorkspace from './lib/components/ChatWorkspace';
-import ProfileStoreManager from './lib/components/ProfileStoreManager';
+import { ChatCategoryCard, ChatThreadRow } from './lib/components/ChatPreviewCard';
 import MarketplaceFeatures from './lib/components/MarketplaceFeatureCard';
+import ProfileStoreManager from './lib/components/ProfileStoreManager';
+import SectionHeader from './lib/components/SectionHeader';
+import LoadingSkeleton from './lib/components/LoadingSkeleton';
+import EmptyState from './lib/components/EmptyState';
+import BottomNavigation from './lib/components/BottomNavigation';
+
+import { Product, Service, Chat, Message } from './types';
+import { mockProducts, fetchProductsSimulated } from './lib/api/products';
+import { mockServices, fetchServicesSimulated } from './lib/api/services';
 
 export default function App() {
-  // Navigation State
-  const [activeTab, setActiveTab] = useState<'products' | 'services' | 'chats' | 'profile'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'chats' | 'services' | 'profile'>('products');
+  const [searchQuery, setSearchQuery] = useState('');
   
-  // Data States
-  const [products, setProducts] = useState<Product[]>([]);
-  const [services, setServices] = useState<Service[]>([]);
+  // Real-time notification lists or states
+  const [notifications, setNotifications] = useState<string[]>([
+    "Welcome to Bareey MVP! Your Escrow wallet is fully activated.",
+    "Amina Bello funded escrow for 'Double Chocolate Celebration Cake'."
+  ]);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  // States for products & services
+  const [productsList, setProductsList] = useState<Product[]>([]);
+  const [servicesList, setServicesList] = useState<Service[]>([]);
   
-  // Loading & Error States
+  // States for API loading states
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [loadingServices, setLoadingServices] = useState(true);
-  const [errorProducts, setErrorProducts] = useState<string | null>(null);
-  const [errorServices, setErrorServices] = useState<string | null>(null);
+  const [productsError, setProductsError] = useState(false);
+  const [servicesError, setServicesError] = useState(false);
 
-  // Search & Filters
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedProductCategory, setSelectedProductCategory] = useState<string>('all');
-  const [selectedServiceCategory, setSelectedServiceCategory] = useState<string>('all');
-  const [selectedState, setSelectedState] = useState<string>('all');
+  // Failure Simulation state (for testing Retry states requested in specification)
+  const [simulateProductFail, setSimulateProductFail] = useState(false);
+  const [simulateServiceFail, setSimulateServiceFail] = useState(false);
 
-  // Chats States
-  const [activeChatCategory, setActiveChatCategory] = useState<'customer' | 'service' | null>(null);
-  const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
-  
-  // Seeding initial chats
+  // Selected chat preview and thread states
   const [chats, setChats] = useState<Chat[]>([
     {
-      id: "chat-seed-1",
-      otherUserId: "user-buyer-john",
-      otherUserName: "John Okafor",
-      targetId: "6a38903e9b6a52edf110a583", // cake
+      id: "chat-1",
+      otherUserId: "6a25a3b3bd244dc51ebff678",
+      otherUserName: "Amina Bello",
+      targetId: "6a38903e9b6a52edf110a583",
       targetTitle: "Double Chocolate Celebration Cake",
       targetType: 'product',
       targetPrice: "₦45,000",
-      category: 'customer', //John wants to buy from me (Deeni Buba)
-      lastMessageText: "I've uploaded the delivery confirmation address. Please dispatch the courier.",
-      lastMessageTime: "2 hours ago",
+      category: 'customer', // customer buying from me
+      lastMessageText: "Hi Amina, yes it is ready! I am boxing it now with priority cooling packs.",
+      lastMessageTime: "10:35 AM",
       unread: true,
-      status: 'shipped',
-      messages: [
-        {
-          id: "m1",
-          senderId: "user-buyer-john",
-          senderName: "John Okafor",
-          text: "Hi, I'm ordering this chocolate cake for my daughter's birthday this Saturday. Is it available for delivery to Adamawa?",
-          timestamp: "Yesterday"
-        },
-        {
-          id: "m2",
-          senderId: "me",
-          senderName: "Deeni Buba",
-          text: "Hello! Yes absolutely. We make them fresh and dispatch via priority temperature-controlled courier so it arrives perfectly fluffy.",
-          timestamp: "Yesterday"
-        },
-        {
-          id: "m3",
-          senderId: "user-buyer-john",
-          senderName: "John Okafor",
-          text: "Wonderful, payment is secure in Bareey escrow now. Please proceed.",
-          timestamp: "Yesterday"
-        },
-        {
-          id: "m4",
-          senderId: "system",
-          senderName: "Bareey Escrow",
-          text: "Buyer deposited payment into Bareey Escrow. Funds are safely secured!",
-          timestamp: "Yesterday"
-        },
-        {
-          id: "m5",
-          senderId: "system",
-          senderName: "Bareey Escrow",
-          text: "Seller has marked item as shipped. Dynamic shipping tracking initialized.",
-          timestamp: "2 hours ago"
-        },
-        {
-          id: "m6",
-          senderId: "user-buyer-john",
-          senderName: "John Okafor",
-          text: "I've uploaded the delivery confirmation address. Please dispatch the courier.",
-          timestamp: "2 hours ago"
-        }
-      ]
-    },
-    {
-      id: "chat-seed-2",
-      otherUserId: "user-buyer-amina",
-      otherUserName: "Amina Bello",
-      targetId: "6a2ae13356a9c476cac3fefe", // ux audit
-      targetTitle: "Heuristic UX Audit Service",
-      targetType: 'service',
-      targetPrice: "Bargain",
-      category: 'customer', // Amina wants to hire me
-      lastMessageText: "Sure, let's schedule a brief chat once you deposit escrow.",
-      lastMessageTime: "5 mins ago",
-      unread: false,
-      status: 'pending',
-      messages: [
-        {
-          id: "am1",
-          senderId: "user-buyer-amina",
-          senderName: "Amina Bello",
-          text: "Hi Deeni! I saw your UX Audit portfolio and I'd love a professional audit of our fintech app. Can you do a 15-page teardown?",
-          timestamp: "30 mins ago"
-        },
-        {
-          id: "am2",
-          senderId: "me",
-          senderName: "Deeni Buba",
-          text: "Hello Amina! Yes, I specialize in identifying micro-interaction friction and user leakage points. Let's do a complete breakdown.",
-          timestamp: "15 mins ago"
-        },
-        {
-          id: "am3",
-          senderId: "user-buyer-amina",
-          senderName: "Amina Bello",
-          text: "Amazing, let's start with a budget of NGN 120,000. Let me know once you are ready.",
-          timestamp: "5 mins ago"
-        }
-      ]
-    },
-    {
-      id: "chat-seed-3",
-      otherUserId: "6a25a3b3bd244dc51ebff677", // Bareey Dev
-      otherUserName: "Bareey Services Tech",
-      targetId: "6a2ae13356a9c476cac3feeb", // dev
-      targetTitle: "Full-Stack Web Development Service",
-      targetType: 'service',
-      targetPrice: "Bargain",
-      category: 'service', // I requested from someone
-      lastMessageText: "The repository scaffolding is complete. I'm preparing the database integration.",
-      lastMessageTime: "Yesterday",
-      unread: false,
       status: 'preparing',
       messages: [
-        {
-          id: "bm1",
-          senderId: "me",
-          senderName: "Deeni Buba",
-          text: "Hi! I need a high-performance marketplace MVP built using React, TypeScript, and TailwindCSS.",
-          timestamp: "2 days ago"
-        },
-        {
-          id: "bm2",
-          senderId: "6a25a3b3bd244dc51ebff677",
-          senderName: "Bareey Services Tech",
-          text: "Hi Deeni! I can absolutely deliver a premium, fast mobile-first platform. Let's setup secure escrow and start.",
-          timestamp: "2 days ago"
-        },
-        {
-          id: "bm3",
-          senderId: "system",
-          senderName: "Bareey Escrow",
-          text: "Buyer deposited payment into Bareey Escrow. Funds are safely secured!",
-          timestamp: "Yesterday"
-        },
-        {
-          id: "bm4",
-          senderId: "6a25a3b3bd244dc51ebff677",
-          senderName: "Bareey Services Tech",
-          text: "The repository scaffolding is complete. I'm preparing the database integration.",
-          timestamp: "Yesterday"
-        }
+        { id: "msg-1", senderId: "other", senderName: "Amina Bello", text: "Hello! Is the chocolate celebration cake ready for pickup? Please use priority cooling dispatch.", timestamp: "10:32 AM" },
+        { id: "msg-2", senderId: "me", senderName: "Me", text: "Hi Amina, yes it is ready! I am boxing it now with priority cooling packs.", timestamp: "10:35 AM" }
       ]
     },
     {
-      id: "chat-seed-4",
-      otherUserId: "user-seller-design",
-      otherUserName: "Elite Design Lab",
-      targetId: "6a2ae13356a9c476cac3feec", // logo
-      targetTitle: "Elite Brand Identity & Logo",
+      id: "chat-2",
+      otherUserId: "6a25a3b3bd244dc51ebff679",
+      otherUserName: "John Okafor",
+      targetId: "6a2ae13356a9c476cac3fefe",
+      targetTitle: "Heuristic UX Audit & UI Teardown Service",
       targetType: 'service',
-      targetPrice: "Fixed Rate",
-      category: 'service', // I requested logo design from them
-      lastMessageText: "Thank you for the five-star rating! Good luck with the Bareey startup launching!",
-      lastMessageTime: "4 days ago",
+      targetPrice: "₦120,000",
+      category: 'customer', // customer hiring me
+      lastMessageText: "Reviewing the leakage points and micro-interactions now. Thanks!",
+      lastMessageTime: "Yesterday",
+      unread: false,
+      status: 'shipped',
+      messages: [
+        { id: "msg-10", senderId: "other", senderName: "John Okafor", text: "Hey! Can you do a heuristic UX review of our fintech MVP?", timestamp: "Yesterday" },
+        { id: "msg-11", senderId: "me", senderName: "Me", text: "Definitely. I've updated the status to escrow preparing. I'll have the PDF audit draft ready within 24 hours.", timestamp: "Yesterday" },
+        { id: "msg-12", senderId: "system", senderName: "Bareey Escrow", text: "Seller has uploaded delivery proof. Awaiting buyer inspection.", timestamp: "Yesterday" },
+        { id: "msg-13", senderId: "other", senderName: "John Okafor", text: "Reviewing the leakage points and micro-interactions now. Thanks!", timestamp: "Yesterday" }
+      ]
+    },
+    {
+      id: "chat-3",
+      otherUserId: "6a25a3b3bd244dc51ebff680",
+      otherUserName: "Zara Boutique",
+      targetId: "6a38903e9b6a52edf110588",
+      targetTitle: "Gabriella Saffiano Leather Tote",
+      targetType: 'product',
+      targetPrice: "₦280,000",
+      category: 'service', // I requested from Zara
+      lastMessageText: "Buyer confirmed delivery. ₦280,000 payout released to Zara Boutique.",
+      lastMessageTime: "2 days ago",
       unread: false,
       status: 'completed',
       messages: [
-        {
-          id: "dm1",
-          senderId: "me",
-          senderName: "Deeni Buba",
-          text: "Hello! I need a minimal, modern brand guidelines document and logo designed.",
-          timestamp: "5 days ago"
-        },
-        {
-          id: "dm2",
-          senderId: "user-seller-design",
-          senderName: "Elite Design Lab",
-          text: "Excellent. I will provide 3 high-fidelity concepts in 2 days. Secure escrow and let's go.",
-          timestamp: "5 days ago"
-        },
-        {
-          id: "dm3",
-          senderId: "system",
-          senderName: "Bareey Escrow",
-          text: "Buyer deposited payment into Bareey Escrow. Funds are safely secured!",
-          timestamp: "5 days ago"
-        },
-        {
-          id: "dm4",
-          senderId: "system",
-          senderName: "Bareey Escrow",
-          text: "Seller has marked item as shipped. Dynamic shipping tracking initialized.",
-          timestamp: "4 days ago"
-        },
-        {
-          id: "dm5",
-          senderId: "me",
-          senderName: "Deeni Buba",
-          text: "This looks stunning! Everything is beautifully vectorized. Confirming release now.",
-          timestamp: "4 days ago"
-        },
-        {
-          id: "dm6",
-          senderId: "system",
-          senderName: "Bareey Escrow",
-          text: "Buyer confirmed delivery. Funds are safely released from escrow back to the seller!",
-          timestamp: "4 days ago"
-        },
-        {
-          id: "dm7",
-          senderId: "user-seller-design",
-          senderName: "Elite Design Lab",
-          text: "Thank you for the five-star rating! Good luck with the Bareey startup launching!",
-          timestamp: "4 days ago"
-        }
+        { id: "msg-20", senderId: "me", senderName: "Me", text: "Hi! Do you have this in royal green or black?", timestamp: "3 days ago" },
+        { id: "msg-21", senderId: "other", senderName: "Zara Boutique", text: "Yes, we have black in stock! Shipped via GIG Logistics. Tracker ref: GIG-9812-NG.", timestamp: "2 days ago" },
+        { id: "msg-22", senderId: "me", senderName: "Me", text: "Perfect! Received and inspected. Excellent quality leather. Releasing funds now.", timestamp: "2 days ago" }
+      ]
+    },
+    {
+      id: "chat-4",
+      otherUserId: "6a25a3b3bd244dc51ebff681",
+      otherUserName: "Tech Savvy Corp",
+      targetId: "6a2ae13356a9c476cac3feeb",
+      targetTitle: "Full-Stack Web Development Service",
+      targetType: 'service',
+      targetPrice: "₦450,000",
+      category: 'service', // I hired Tech Savvy Corp
+      lastMessageText: "Perfect! Escrow payment received successfully. Preparing your order now.",
+      lastMessageTime: "3 days ago",
+      unread: false,
+      status: 'preparing',
+      messages: [
+        { id: "msg-30", senderId: "me", senderName: "Me", text: "Hi, I need a simple React dashboard connected to a custom API proxy. Can you deliver in 3 days?", timestamp: "3 days ago" },
+        { id: "msg-31", senderId: "other", senderName: "Tech Savvy Corp", text: "Yes, absolutely! We can set that up using Vite + TypeScript. Please deposit into Bareey Escrow to begin.", timestamp: "3 days ago" },
+        { id: "msg-32", senderId: "system", senderName: "Bareey Escrow", text: "Buyer deposited payment of ₦450,000 into Bareey Escrow. Funds are safely secured!", timestamp: "3 days ago" }
       ]
     }
   ]);
 
-  // Fetch Products & Services
-  const loadMarketplaceData = async () => {
+  // Active Chats filter 'customer' | 'service' (never mix)
+  const [selectedChatCategory, setSelectedChatCategory] = useState<'customer' | 'service' | null>(null);
+  const [activeChatId, setActiveChatId] = useState<string | null>(null);
+
+  // Simulated API Data Loaders
+  const loadProducts = async (fail = false) => {
     setLoadingProducts(true);
-    setErrorProducts(null);
+    setProductsError(false);
     try {
-      const prods = await fetchProductsSimulated(false);
-      setProducts(prods);
-    } catch (err: any) {
-      setErrorProducts(err.message || "Failed to load products");
+      const data = await fetchProductsSimulated(fail);
+      setProductsList(data);
+    } catch (err) {
+      setProductsError(true);
     } finally {
       setLoadingProducts(false);
     }
   };
 
-  const loadServicesData = async () => {
+  const loadServices = async (fail = false) => {
     setLoadingServices(true);
-    setErrorServices(null);
+    setServicesError(false);
     try {
-      const servs = await fetchServicesSimulated(false);
-      setServices(servs);
-    } catch (err: any) {
-      setErrorServices(err.message || "Failed to load services");
+      const data = await fetchServicesSimulated(fail);
+      setServicesList(data);
+    } catch (err) {
+      setServicesError(true);
     } finally {
       setLoadingServices(false);
     }
   };
 
   useEffect(() => {
-    loadMarketplaceData();
-    loadServicesData();
-  }, []);
+    loadProducts(simulateProductFail);
+  }, [simulateProductFail]);
 
-  // Filter products based on search & category
-  const filteredProducts = products.filter(p => {
-    const matchesSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          p.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedProductCategory === 'all' || p.category === selectedProductCategory;
-    return matchesSearch && matchesCategory;
-  });
+  useEffect(() => {
+    loadServices(simulateServiceFail);
+  }, [simulateServiceFail]);
 
-  // Filter services based on search, category & state
-  const filteredServices = services.filter(s => {
-    const matchesSearch = s.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          s.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          s.subcategories.some(sub => sub.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesCategory = selectedServiceCategory === 'all' || s.categoryKey === selectedServiceCategory;
-    const matchesState = selectedState === 'all' || s.state.toLowerCase() === selectedState.toLowerCase();
-    return matchesSearch && matchesCategory && matchesState;
-  });
-
-  // Unique list of states from mockServices
-  const serviceStates = ['all', ...Array.from(new Set(services.map(s => s.state)))];
-
-  // Initiate Chat when requesting service
-  const handleRequestServiceChat = (service: Service) => {
-    // Check if chat already exists for this service
-    const existingChat = chats.find(c => c.targetId === service._id && c.category === 'service');
-    
-    if (existingChat) {
-      setSelectedChat(existingChat);
-      setActiveChatCategory('service');
-      setActiveTab('chats');
-      return;
-    }
-
-    // Create a new chat thread
-    const newChat: Chat = {
-      id: `chat-custom-${Date.now()}`,
-      otherUserId: service.usersid,
-      otherUserName: service.name.split(' ').slice(0, 2).join(' ') + " Specialist",
-      targetId: service._id,
-      targetTitle: service.name,
-      targetType: 'service',
-      targetPrice: service.pricing.bargain ? 'Bargain' : 'Fixed Rate',
-      category: 'service', // I requested this service
-      lastMessageText: `Hi! I want to request your service: "${service.name}". Let's discuss requirements.`,
-      lastMessageTime: "Just now",
-      unread: false,
-      status: 'pending',
-      messages: [
-        {
-          id: `msg-first-${Date.now()}`,
-          senderId: 'me',
-          senderName: 'Deeni Buba',
-          text: `Hi! I am interested in your listed service: "${service.name}". Let's discuss the delivery terms and secure escrow.`,
-          timestamp: 'Just now'
-        }
-      ]
-    };
-
-    setChats(prev => [newChat, ...prev]);
-    setSelectedChat(newChat);
-    setActiveChatCategory('service');
-    setActiveTab('chats');
+  // Merchant Actions
+  const handleAddProduct = (newProduct: Product) => {
+    setProductsList(prev => [newProduct, ...prev]);
+    setNotifications(prev => [
+      `Successfully published new product: '${newProduct.title}' to Bareey Marketplace.`,
+      ...prev
+    ]);
   };
 
-  // Initiate Chat when buying product
-  const handleBuyProductChat = (product: Product) => {
-    // Check if chat already exists
-    const existingChat = chats.find(c => c.targetId === product._id && c.category === 'service');
+  const handleAddService = (newService: Service) => {
+    setServicesList(prev => [newService, ...prev]);
+    setNotifications(prev => [
+      `Successfully listed your service: '${newService.name}' with escrow verification.`,
+      ...prev
+    ]);
+  };
 
-    if (existingChat) {
-      setSelectedChat(existingChat);
-      setActiveChatCategory('service');
+  // Chat Activation Handlers
+  const openChatForProduct = (product: Product) => {
+    // Check if chat already exists
+    const existing = chats.find(c => c.targetId === product._id);
+    if (existing) {
+      setActiveChatId(existing.id);
+      setSelectedChatCategory(existing.category);
       setActiveTab('chats');
       return;
     }
 
+    // Create a new service (buying) chat thread
     const priceFormatted = new Intl.NumberFormat('en-NG', {
       style: 'currency',
       currency: 'NGN',
       maximumFractionDigits: 0
-    }).format(product.theprices[0]);
+    }).format(product.theprices[0] || 50000);
 
     const newChat: Chat = {
-      id: `chat-custom-${Date.now()}`,
+      id: `chat-${Date.now()}`,
       otherUserId: product.usersid,
-      otherUserName: product.shopinformation.title.split(' ').slice(0, 2).join(' ') + " Merchant",
+      otherUserName: product.shopinformation?.title || "Merchant Partner",
       targetId: product._id,
       targetTitle: product.title,
       targetType: 'product',
       targetPrice: priceFormatted,
-      category: 'service', // I am buying from them
-      lastMessageText: `Hello! I would like to buy your product: "${product.title}" for ${priceFormatted}.`,
+      category: 'service', // Deeni buying from another seller
+      lastMessageText: "Hi! I am interested in this product. Let's start the secure transaction.",
       lastMessageTime: "Just now",
       unread: false,
       status: 'pending',
       messages: [
         {
-          id: `msg-first-${Date.now()}`,
+          id: `msg-${Date.now()}`,
           senderId: 'me',
-          senderName: 'Deeni Buba',
-          text: `Hello! I would like to purchase your product: "${product.title}" for ${priceFormatted}. Please let me know if it's ready for immediate shipping.`,
+          senderName: 'Me',
+          text: `Hi! I want to purchase your "${product.title}" for ${priceFormatted}. Please let me know once escrow is funded!`,
           timestamp: 'Just now'
         }
       ]
     };
 
     setChats(prev => [newChat, ...prev]);
-    setSelectedChat(newChat);
-    setActiveChatCategory('service');
+    setActiveChatId(newChat.id);
+    setSelectedChatCategory('service');
     setActiveTab('chats');
   };
 
-  // Update Chat state inside general state
-  const handleUpdateChatStatus = (chatId: string, status: Chat['status'], updatedMessages: Message[]) => {
+  const openChatForService = (service: Service) => {
+    // Check if chat already exists
+    const existing = chats.find(c => c.targetId === service._id);
+    if (existing) {
+      setActiveChatId(existing.id);
+      setSelectedChatCategory(existing.category);
+      setActiveTab('chats');
+      return;
+    }
+
+    // Create a new service request chat thread
+    const newChat: Chat = {
+      id: `chat-${Date.now()}`,
+      otherUserId: service.usersid,
+      otherUserName: service.name.split(" ").slice(0, 2).join(" ") || "Professional Partner",
+      targetId: service._id,
+      targetTitle: service.name,
+      targetType: 'service',
+      targetPrice: service.pricing.bargain ? 'Open budget' : 'Fixed rate',
+      category: 'service', // Deeni hiring another provider
+      lastMessageText: "Hi! I want to request your service. Let's discuss details.",
+      lastMessageTime: "Just now",
+      unread: false,
+      status: 'pending',
+      messages: [
+        {
+          id: `msg-${Date.now()}`,
+          senderId: 'me',
+          senderName: 'Me',
+          text: `Hi! I am interested in your service: "${service.name}". Let's start a secure conversation thread.`,
+          timestamp: 'Just now'
+        }
+      ]
+    };
+
+    setChats(prev => [newChat, ...prev]);
+    setActiveChatId(newChat.id);
+    setSelectedChatCategory('service');
+    setActiveTab('chats');
+  };
+
+  const handleUpdateChatStatus = (chatId: string, status: Chat['status'], messages: Message[]) => {
     setChats(prev => prev.map(chat => {
       if (chat.id === chatId) {
+        const lastMsg = messages[messages.length - 1];
         return {
           ...chat,
           status,
-          messages: updatedMessages,
-          lastMessageText: updatedMessages[updatedMessages.length - 1]?.text || chat.lastMessageText,
-          lastMessageTime: "Just now",
-          unread: false
+          messages,
+          lastMessageText: lastMsg ? lastMsg.text : chat.lastMessageText,
+          lastMessageTime: lastMsg ? lastMsg.timestamp : chat.lastMessageTime
         };
       }
       return chat;
     }));
-
-    // Keep active workspace synchronized
-    if (selectedChat?.id === chatId) {
-      setSelectedChat(prev => prev ? {
-        ...prev,
-        status,
-        messages: updatedMessages,
-        lastMessageText: updatedMessages[updatedMessages.length - 1]?.text || prev.lastMessageText,
-        unread: false
-      } : null);
-    }
   };
 
-  // Add Product dynamically to listing (Profile screen trigger)
-  const handleAddProduct = (newProduct: Product) => {
-    setProducts(prev => [newProduct, ...prev]);
-    setActiveTab('products'); // redirect to marketplace to show it!
-  };
+  // Search filter lists
+  const filteredProducts = productsList.filter(p => 
+    p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.subcategory.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-  // Add Service dynamically
-  const handleAddService = (newService: Service) => {
-    setServices(prev => [newService, ...prev]);
-    setActiveTab('services'); // redirect to show it!
-  };
+  const filteredServices = servicesList.filter(s => 
+    s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    s.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    s.categoryLabel.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-  // Chats selectors filtering counts
-  const unreadCustomerCount = chats.filter(c => c.category === 'customer' && c.unread).length;
-  const unreadServiceCount = chats.filter(c => c.category === 'service' && c.unread).length;
-
-  const currentCategoryChats = chats.filter(c => c.category === activeChatCategory);
+  // Count active chats for badges
+  const activeCustomerChatsCount = chats.filter(c => c.category === 'customer' && c.status !== 'completed' && c.status !== 'cancelled').length;
+  const activeServiceChatsCount = chats.filter(c => c.category === 'service' && c.status !== 'completed' && c.status !== 'cancelled').length;
 
   return (
-    <div className="min-h-screen bg-[#fafaf9] text-gray-900 font-sans flex flex-col pb-24 md:pb-0 selection:bg-black selection:text-white relative overflow-x-hidden">
-      {/* Mesh background glows */}
-      <div className="absolute top-0 left-0 right-0 bottom-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-orange-200/15 rounded-full blur-[110px]" />
-        <div className="absolute top-[30%] right-[-10%] w-[600px] h-[600px] bg-amber-200/10 rounded-full blur-[130px]" />
-        <div className="absolute bottom-[-10%] left-[10%] w-[450px] h-[450px] bg-orange-100/15 rounded-full blur-[100px]" />
-      </div>
-
-      {/* Global Navbar */}
-      <div className="relative z-10">
-        <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
-      </div>
-
-      {/* Hero section visible on home screen (Products / Services pages) */}
-      {activeTab === 'products' && searchQuery === '' && (
-        <div className="relative z-10">
-          <HeroBanner 
-            onExploreProducts={() => {
-              const el = document.getElementById('market-grid');
-              el?.scrollIntoView({ behavior: 'smooth' });
-            }} 
-            onExploreServices={() => setActiveTab('services')} 
-          />
-        </div>
-      )}
-
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full relative z-10">
-        <AnimatePresence mode="wait">
-          
-          {/* 1. PRODUCTS (MARKETPLACE) TAB */}
-          {activeTab === 'products' && (
-            <motion.div
-              key="products"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.4 }}
-              className="space-y-8"
-              id="market-grid"
-            >
-              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                <SectionHeader 
-                  badge="Bareey Marketplace"
-                  title="Featured Products" 
-                  description="Securely trade gadgets, baking delights, luxury footwear and local delicacies under a solid Escrow guarantee."
-                />
-
-                {/* Search & Category Filter */}
-                <div className="flex flex-col sm:flex-row gap-3 w-full md:max-w-xl">
-                  {/* Search box */}
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3.5 top-3 w-4 h-4 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="Search physical products..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full bg-white/70 backdrop-blur-md border border-white/50 rounded-2xl pl-10 pr-4 py-2.5 text-sm focus:outline-hidden focus:border-orange-400 transition-all text-gray-900 shadow-2xs"
-                    />
-                  </div>
-
-                  {/* Category Selection Filter pills */}
-                  <div className="flex gap-1.5 overflow-x-auto pb-1 shrink-0">
-                    {['all', 'electronics', 'fashion', 'home', 'food'].map((cat) => (
-                      <button
-                        key={cat}
-                        onClick={() => setSelectedProductCategory(cat)}
-                        className={`px-4 py-2.5 text-xs font-bold rounded-xl uppercase tracking-wider transition-all cursor-pointer backdrop-blur-xs ${
-                          selectedProductCategory === cat
-                            ? 'bg-black text-white shadow-xs'
-                            : 'bg-white/60 border border-white/40 text-gray-500 hover:text-black hover:bg-white/90'
-                        }`}
-                      >
-                        {cat}
-                      </button>
-                    ))}
-                  </div>
+    <div className="min-h-screen bg-[#FDFDFC] text-gray-900 font-sans flex flex-col relative selection:bg-blue-100 selection:text-blue-900 overflow-x-hidden">
+      
+      {/* Dynamic Notifications Dropdown popup panel */}
+      <AnimatePresence>
+        {showNotifications && (
+          <div className="absolute right-6 top-16 z-50 bg-white border border-gray-100 rounded-3xl p-5 max-w-sm w-full shadow-2xl">
+            <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-50">
+              <span className="font-extrabold text-sm text-gray-950 uppercase tracking-wider">Activity Alerts</span>
+              <button 
+                onClick={() => setShowNotifications(false)}
+                className="p-1 hover:bg-gray-50 rounded-lg text-gray-400 hover:text-gray-700 transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            
+            <div className="space-y-3 max-h-60 overflow-y-auto">
+              {notifications.map((notif, index) => (
+                <div key={index} className="flex gap-2.5 items-start p-2 hover:bg-gray-50 rounded-xl transition-all">
+                  <span className="w-2 h-2 mt-1.5 rounded-full bg-blue-600 shrink-0" />
+                  <p className="text-xs text-gray-600 leading-relaxed font-medium">{notif}</p>
                 </div>
-              </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
 
-              {/* Grid loading / errors or products list */}
+      {/* Modern Slim Sticky Navbar */}
+      <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
+
+      {/* Quick Search & Notification Utilities bar */}
+      <div className="bg-white/40 border-b border-gray-100/50 backdrop-blur-md sticky top-16 z-40 py-3.5 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
+          {/* Svelte/React Search Bar */}
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search products, professional services or categories..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-white/70 border border-gray-100 hover:border-gray-200 focus:border-black text-xs sm:text-sm rounded-2xl pl-10 pr-4 py-2.5 focus:outline-hidden transition-all"
+            />
+          </div>
+
+          <div className="flex items-center gap-3 self-end sm:self-auto">
+            {/* Simulation Controller Switcher (for showing Loading/Success/Error/Retry) */}
+            <div className="flex gap-1 bg-gray-100/70 p-1.5 rounded-2xl border border-gray-100 text-[10px] font-bold">
+              <button 
+                onClick={() => {
+                  setSimulateProductFail(prev => !prev);
+                  setSimulateServiceFail(prev => !prev);
+                }}
+                className={`px-2.5 py-1.5 rounded-lg transition-all ${
+                  simulateProductFail 
+                    ? 'bg-red-500 text-white shadow-xs' 
+                    : 'text-gray-500 hover:text-black hover:bg-gray-50'
+                }`}
+              >
+                {simulateProductFail ? 'Simulated: Error Mode' : 'Simulate API Network Error'}
+              </button>
+            </div>
+
+            {/* Notification Bell */}
+            <button 
+              onClick={() => setShowNotifications(!showNotifications)}
+              className="p-2.5 hover:bg-gray-100 rounded-xl transition-all cursor-pointer text-gray-600 relative shrink-0"
+            >
+              <Bell className="w-5 h-5" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-blue-600 rounded-full"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Dashboard Layout */}
+      <main className="flex-1 pb-24 md:pb-12 relative z-10">
+        
+        {/* TAB 1: MARKETPLACE / PRODUCTS */}
+        {activeTab === 'products' && (
+          <div>
+            <HeroBanner 
+              onExploreProducts={() => {
+                const el = document.getElementById('products-explore');
+                el?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              onExploreServices={() => setActiveTab('services')}
+            />
+
+            {/* Marketplace Scrolling Row Section */}
+            <div id="products-explore" className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
+              <SectionHeader 
+                title="Explore the Marketplace" 
+                description="Discover and purchase trusted products safely. All payments are held in Bareey Escrow until you confirm receipt."
+                badge="Commerce Marketplace"
+              />
+
+              {/* State 1: Loading Skeleton */}
               {loadingProducts ? (
                 <LoadingSkeleton type="list" />
-              ) : errorProducts ? (
-                <EmptyState 
+              ) : productsError ? (
+                /* State 3: Error State & Retry Trigger */
+                <EmptyState
                   type="error"
-                  title="Oops! Loading failed" 
-                  description={errorProducts} 
-                  onRetry={loadMarketplaceData}
+                  title="Products Load Interrupted"
+                  description="A simulated API connection failure is active. Click retry to recover."
+                  onRetry={() => {
+                    setSimulateProductFail(false);
+                    loadProducts(false);
+                  }}
+                  retryLabel="Recover & Retry API Call"
                 />
               ) : filteredProducts.length === 0 ? (
-                <EmptyState 
-                  title="No products found" 
-                  description="We couldn't find any products matching your query or selected category. Try exploring another catalog!"
-                  onRetry={() => { setSearchQuery(''); setSelectedProductCategory('all'); }}
-                  retryLabel="Reset Filters"
+                <EmptyState
+                  title="No Matching Products Found"
+                  description={`We couldn't find any listings for "${searchQuery}". Please test another search query.`}
                 />
               ) : (
-                <div className="relative">
-                  <span className="text-[10px] text-gray-400 uppercase font-bold block mb-3">
-                    Showing {filteredProducts.length} items
-                  </span>
-                  
-                  {/* Horizontally scrollable list */}
-                  <div className="flex gap-6 overflow-x-auto pb-6 pt-1 px-1 scrollbar-thin scrollbar-thumb-gray-200">
-                    {filteredProducts.map((prod) => (
-                      <ProductCard 
-                        key={prod._id} 
-                        product={prod} 
-                        onOpenChat={handleBuyProductChat}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Trust Features Visually */}
-              <MarketplaceFeatures />
-            </motion.div>
-          )}
-
-          {/* 2. SERVICES TAB */}
-          {activeTab === 'services' && (
-            <motion.div
-              key="services"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.4 }}
-              className="space-y-8"
-            >
-              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                <SectionHeader 
-                  badge="Services Platform"
-                  title="Hire Top Talent" 
-                  description="Browse experienced professionals in Programming, UI/UX, AI pipelines, Copywriting, Video Editing and Legal setups."
-                />
-
-                {/* Filters Row */}
-                <div className="flex flex-col sm:flex-row gap-3 w-full md:max-w-2xl">
-                  {/* Search input */}
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3.5 top-3 w-4 h-4 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="Search expertise or skill..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full bg-white/70 backdrop-blur-md border border-white/50 rounded-2xl pl-10 pr-4 py-2.5 text-sm focus:outline-hidden focus:border-orange-400 transition-all text-gray-900 shadow-2xs"
-                    />
-                  </div>
-
-                  {/* Category Key filters */}
-                  <select
-                    value={selectedServiceCategory}
-                    onChange={(e) => setSelectedServiceCategory(e.target.value)}
-                    className="bg-white/70 backdrop-blur-md border border-white/50 rounded-2xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider focus:outline-hidden focus:border-orange-400 transition-all cursor-pointer text-gray-700 shadow-2xs"
-                  >
-                    <option value="all">All Specialties</option>
-                    <option value="tech_digital">Programming</option>
-                    <option value="design">Graphic Design</option>
-                    <option value="uiux">UI/UX Design</option>
-                    <option value="ai_ml">AI & Data Science</option>
-                    <option value="marketing">Marketing</option>
-                    <option value="video_photo">Video & Photo</option>
-                    <option value="writing">Writing & Copy</option>
-                    <option value="finance_biz">Business & Finance</option>
-                  </select>
-
-                  {/* State Filters */}
-                  <select
-                    value={selectedState}
-                    onChange={(e) => setSelectedState(e.target.value)}
-                    className="bg-white/70 backdrop-blur-md border border-white/50 rounded-2xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider focus:outline-hidden focus:border-orange-400 transition-all cursor-pointer text-gray-700 shadow-2xs"
-                  >
-                    <option value="all">Every State</option>
-                    {serviceStates.filter(s => s !== 'all').map((state) => (
-                      <option key={state} value={state}>{state}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Service listings container */}
-              {loadingServices ? (
-                <LoadingSkeleton type="grid" />
-              ) : errorServices ? (
-                <EmptyState 
-                  type="error"
-                  title="Could not fetch services" 
-                  description={errorServices} 
-                  onRetry={loadServicesData}
-                />
-              ) : filteredServices.length === 0 ? (
-                <EmptyState 
-                  title="No professional services found" 
-                  description="Try adjusting your filters, state region, or query to discover talented experts."
-                  onRetry={() => { setSearchQuery(''); setSelectedServiceCategory('all'); setSelectedState('all'); }}
-                  retryLabel="Reset Filters"
-                />
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {filteredServices.map((service) => (
-                    <ServiceCard 
-                      key={service._id} 
-                      service={service} 
-                      onRequestService={handleRequestServiceChat}
+                /* State 2: Success List Horizontal Scrolling */
+                <div className="flex gap-6 overflow-x-auto pb-6 scrollbar-thin scrollbar-thumb-gray-200 select-none">
+                  {filteredProducts.map((product) => (
+                    <ProductCard
+                      key={product._id}
+                      product={product}
+                      onOpenChat={openChatForProduct}
                     />
                   ))}
                 </div>
               )}
-            </motion.div>
-          )}
+            </div>
 
-          {/* 3. CHATS SYSTEM TAB */}
-          {activeTab === 'chats' && (
-            <motion.div
-              key="chats"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.4 }}
-              className="max-w-4xl mx-auto space-y-6"
-            >
-              {selectedChat ? (
-                /* Dynamic Workspace Chat window is active */
-                <ChatWorkspace 
-                  chat={selectedChat} 
-                  onBack={() => setSelectedChat(null)} 
-                  onUpdateChatStatus={handleUpdateChatStatus}
-                />
-              ) : activeChatCategory ? (
-                /* Chat threads list is visible for category (Customers or Services) */
-                <div className="space-y-6">
-                  <div className="flex items-center gap-3">
-                    <button 
-                      onClick={() => setActiveChatCategory(null)}
-                      className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-lg transition-colors cursor-pointer"
-                    >
-                      ← Categories
-                    </button>
-                    <h3 className="text-xl font-extrabold text-gray-950 capitalize">
-                      {activeChatCategory === 'customer' ? 'My Customer Conversations' : 'My Service Requests'}
-                    </h3>
-                  </div>
+            {/* Marketplace Flow Explanation Timeline */}
+            <MarketplaceFeatures />
 
-                  {currentCategoryChats.length === 0 ? (
-                    <div className="p-12 text-center bg-gray-50 border border-gray-100 rounded-3xl">
-                      <p className="text-sm font-semibold text-gray-500">No conversations in this section yet</p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        {activeChatCategory === 'customer' 
-                          ? 'When users request your service or buy items, chats appear here.'
-                          : 'Request services or products to initiate secure chats with sellers.'
-                        }
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-3.5">
-                      {currentCategoryChats.map((c) => (
-                        <ChatThreadRow 
-                          key={c.id} 
-                          chat={c} 
-                          onClick={() => setSelectedChat(c)}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                /* Category Selection Overview (Customers vs. Services) */
-                <div className="space-y-8">
-                  <SectionHeader 
-                    badge="Bareey Conversations"
-                    title="Choose Inbox Workspace" 
-                    description="Bareey separates your chats cleanly into Customer Requests (where you sell) and Service Requests (where you hire)."
-                  />
+            {/* Escrow Rule Protection Specifications */}
+            <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
+              <div className="bg-white/80 border border-gray-100 rounded-3xl p-8 sm:p-12 shadow-xs">
+                <div className="max-w-3xl">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-blue-600">Secure Trading Guidelines</span>
+                  <h3 className="text-2xl sm:text-3xl font-extrabold text-gray-950 mt-1 mb-4">Bareey Buyer Protection Regulations</h3>
+                  <p className="text-gray-500 text-sm sm:text-base leading-relaxed mb-8">
+                    To eliminate disputes and protect our merchants, Bareey implements simple, transparent liabilities for cancel/refund requests post-shipment:
+                  </p>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <ChatCategoryCard 
-                      title="Customers"
-                      description="When customers request your service, you will see their conversations here."
-                      type="customer"
-                      count={unreadCustomerCount}
-                      onClick={() => setActiveChatCategory('customer')}
-                    />
+                    <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm shrink-0">1</div>
+                      <div>
+                        <h4 className="font-bold text-gray-950 text-sm mb-1">Pre-Shipping Cancellations</h4>
+                        <p className="text-xs text-gray-500 leading-relaxed">Buyers can cancel anytime before shipping begins for a full automatic instant refund. No charges applied.</p>
+                      </div>
+                    </div>
 
-                    <ChatCategoryCard 
-                      title="Services & Orders"
-                      description="When you request a service from someone, those conversations appear here."
-                      type="service"
-                      count={unreadServiceCount}
-                      onClick={() => setActiveChatCategory('service')}
-                    />
+                    <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-sm shrink-0">2</div>
+                      <div>
+                        <h4 className="font-bold text-gray-950 text-sm mb-1">Change of Mind Rules</h4>
+                        <p className="text-xs text-gray-500 leading-relaxed">If the seller shipped correct items and you cancel, you (the buyer) pay shipping costs both ways.</p>
+                      </div>
+                    </div>
+
+                    <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center font-bold text-sm shrink-0">3</div>
+                      <div>
+                        <h4 className="font-bold text-gray-950 text-sm mb-1">Wrong Item Liability</h4>
+                        <p className="text-xs text-gray-500 leading-relaxed">If the seller ships the wrong product, the seller pays every single shipping cost. Buyer receives full refund.</p>
+                      </div>
+                    </div>
+
+                    <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-gray-100 text-gray-600 flex items-center justify-center font-bold text-sm shrink-0">4</div>
+                      <div>
+                        <h4 className="font-bold text-gray-950 text-sm mb-1">Standard Terms Apply</h4>
+                        <p className="text-xs text-gray-500 leading-relaxed">All agreements are recorded on secure SvelteKit/React logs to protect both parties in arbitration.</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 2: CHATS Workspace & Separate categories */}
+        {activeTab === 'chats' && (
+          <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6">
+            <AnimatePresence mode="wait">
+              {activeChatId ? (
+                /* Thread View Inside Chat Workspace */
+                <motion.div
+                  key="active-workspace"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                >
+                  {(() => {
+                    const matchedChat = chats.find(c => c.id === activeChatId);
+                    if (!matchedChat) return null;
+                    return (
+                      <ChatWorkspace
+                        chat={matchedChat}
+                        onBack={() => setActiveChatId(null)}
+                        onUpdateChatStatus={handleUpdateChatStatus}
+                      />
+                    );
+                  })()}
+                </motion.div>
+              ) : selectedChatCategory === null ? (
+                /* Category Selection Workspace view */
+                <motion.div
+                  key="chat-category-select"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="space-y-8"
+                >
+                  <SectionHeader
+                    title="Unified Escrow Chat System"
+                    description="Bareey separates conversations into independent workspaces. Select an inbox below."
+                    badge="Secure Channels"
+                  />
+
+                  {/* Two equal cards visually identical as requested */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <ChatCategoryCard
+                      title="Customer Chats"
+                      description="When buyers request your services or buy listed items, those secure conversations appear here."
+                      type="customer"
+                      count={activeCustomerChatsCount}
+                      onClick={() => setSelectedChatCategory('customer')}
+                    />
+
+                    <ChatCategoryCard
+                      title="Service Chats"
+                      description="When you request services or buy items from another provider, those conversations appear here."
+                      type="service"
+                      count={activeServiceChatsCount}
+                      onClick={() => setSelectedChatCategory('service')}
+                    />
+                  </div>
+                </motion.div>
+              ) : (
+                /* Thread list view depending on category (Never mixed) */
+                <motion.div
+                  key="chat-threads-list"
+                  initial={{ opacity: 0, x: 15 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -15 }}
+                  className="space-y-6"
+                >
+                  <div className="flex justify-between items-center">
+                    <button 
+                      onClick={() => setSelectedChatCategory(null)}
+                      className="text-xs font-bold text-gray-400 hover:text-black uppercase tracking-wider flex items-center gap-1.5"
+                    >
+                      ← Back to categories
+                    </button>
+                    
+                    <span className="px-3 py-1 bg-black text-white rounded-lg text-xs font-bold uppercase tracking-wider">
+                      {selectedChatCategory === 'customer' ? 'Customer Inbox' : 'Service Requests'}
+                    </span>
+                  </div>
+
+                  {chats.filter(c => c.category === selectedChatCategory).length === 0 ? (
+                    <EmptyState
+                      title="No conversations listed"
+                      description={`Your ${selectedChatCategory} chat log is empty. Open items in the marketplace or services directory to start.`}
+                    />
+                  ) : (
+                    <div className="space-y-3.5">
+                      {chats
+                        .filter(c => c.category === selectedChatCategory)
+                        .map((chat) => (
+                          <ChatThreadRow
+                            key={chat.id}
+                            chat={chat}
+                            onClick={() => setActiveChatId(chat.id)}
+                          />
+                        ))}
+                    </div>
+                  )}
+                </motion.div>
               )}
-            </motion.div>
-          )}
+            </AnimatePresence>
+          </div>
+        )}
 
-          {/* 4. PROFILE (STORE MANAGER) TAB */}
-          {activeTab === 'profile' && (
-            <motion.div
-              key="profile"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.4 }}
-            >
-              <ProfileStoreManager 
-                products={products} 
-                services={services} 
-                onAddProduct={handleAddProduct}
-                onAddService={handleAddService}
+        {/* TAB 3: SERVICES DIRECTORY */}
+        {activeTab === 'services' && (
+          <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+            <SectionHeader 
+              title="Services Directory" 
+              description="Browse and hire certified experts across development, design, copy or marketing fields. Hire with secure escrow safeguards."
+              badge="Services Index"
+            />
+
+            {/* Simulated API States for Services */}
+            {loadingServices ? (
+              <LoadingSkeleton type="grid" />
+            ) : servicesError ? (
+              <EmptyState
+                type="error"
+                title="Failed to Load Services"
+                description="Simulated network failure is active. Click retry to recover."
+                onRetry={() => {
+                  setSimulateServiceFail(false);
+                  loadServices(false);
+                }}
+                retryLabel="Retry API Load"
               />
-            </motion.div>
-          )}
+            ) : filteredServices.length === 0 ? (
+              <EmptyState
+                title="No Matching Services Found"
+                description={`We couldn't find any professional service listings for "${searchQuery}".`}
+              />
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {filteredServices.map((service) => (
+                  <ServiceCard
+                    key={service._id}
+                    service={service}
+                    onRequestService={openChatForService}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
-        </AnimatePresence>
+        {/* TAB 4: MERCHANT PROFILE (MY STORE) */}
+        {activeTab === 'profile' && (
+          <ProfileStoreManager
+            products={productsList}
+            services={servicesList}
+            onAddProduct={handleAddProduct}
+            onAddService={handleAddService}
+          />
+        )}
+
       </main>
 
-      {/* Floating Bottom Navigation for Mobile */}
+      {/* Responsive bottom mobile layout navigation bars */}
       <BottomNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
+
     </div>
   );
 }

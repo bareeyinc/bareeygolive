@@ -36,9 +36,8 @@ export default function HeroBanner({ onExploreProducts, onExploreServices }: Her
           transition={{ duration: 0.6, delay: 0.1 }}
           className="text-4xl sm:text-6xl font-extrabold tracking-tight text-gray-900 mb-6 leading-[1.1]"
         >
-          Buy Products. <br className="sm:hidden" />
-          <span className="text-gray-900">Offer Services.</span> <br />
-          <span className="bg-gradient-to-r from-gray-900 to-gray-500 bg-clip-text text-transparent">Chat Securely.</span>
+          Everything you need to <br className="hidden sm:inline" />
+          <span className="bg-gradient-to-r from-gray-900 to-gray-500 bg-clip-text text-transparent">buy, sell and hire.</span>
         </motion.h1>
 
         {/* Subheadline */}
@@ -48,7 +47,7 @@ export default function HeroBanner({ onExploreProducts, onExploreServices }: Her
           transition={{ duration: 0.6, delay: 0.2 }}
           className="text-lg sm:text-xl text-gray-500 max-w-2xl mx-auto mb-10 leading-relaxed"
         >
-          Everything you need to buy, sell, hire and communicate in one trusted marketplace.
+          Discover trusted products, connect with service providers, chat instantly, and shop with confidence using Bareey.
         </motion.p>
 
         {/* Call to Actions */}
@@ -63,7 +62,7 @@ export default function HeroBanner({ onExploreProducts, onExploreServices }: Her
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 text-base font-semibold text-white bg-black hover:bg-gray-900 rounded-2xl transition-all shadow-md active:scale-98 cursor-pointer group"
           >
             <ShoppingBag className="w-5 h-5" />
-            Explore Marketplace
+            Browse Marketplace
             <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
           </button>
           

@@ -1,6 +1,6 @@
 {
   "name": "Bareey",
-  "description": "Buy. Sell. Offer Services. The trusted all-in-one marketplace with secure escrow payments and instant chat.",
+  "description": "Secure trade and escrow platform for peer-to-peer transactions, services, and physical goods. Protect your money and trade with absolute confidence.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
