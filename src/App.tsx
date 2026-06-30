@@ -12,6 +12,7 @@ import {
   Lock, ArrowDownLeft, ArrowUpRight, Scale, ShieldAlert, BadgeCheck
 } from 'lucide-react';
 import PlatformView from './PlatformView';
+import PolicyView from './PolicyView';
 
 // Play Store Link
 const BAREEY_PLAYSTORE_URL = "https://play.google.com/store/apps/details?id=com.bareeyinc.bareey&hl=en";
@@ -36,6 +37,23 @@ export default function App() {
   // Navigation active state
   const [activeNav, setActiveNav] = useState<'features' | 'how-it-works' | 'simulator' | 'calculator' | 'faqs'>('features');
   const [viewMode, setViewMode] = useState<'marketing' | 'platform'>('marketing');
+
+  // Simple custom SPA routing for Google Play policies check
+  const [currentPath, setCurrentPath] = useState(() => window.location.pathname);
+
+  React.useEffect(() => {
+    const handlePopState = () => {
+      setCurrentPath(window.location.pathname);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const navigateTo = (path: string) => {
+    window.history.pushState(null, '', path);
+    setCurrentPath(path);
+    window.scrollTo(0, 0);
+  };
 
   // Interactive Fee Calculator State
   const [calcAmount, setCalcAmount] = useState<number>(50000);
@@ -303,6 +321,10 @@ export default function App() {
       el.scrollIntoView({ behavior: 'smooth' });
     }
   };
+
+  if (currentPath === '/check') {
+    return <PolicyView onBack={() => navigateTo('/')} />;
+  }
 
   return (
     <div className="min-h-screen bg-[#FBFBFA] text-gray-900 font-sans flex flex-col selection:bg-orange-100 selection:text-orange-900 relative overflow-x-hidden">
@@ -1306,7 +1328,7 @@ export default function App() {
       <footer className="bg-black text-white py-12 px-4 sm:px-6 lg:px-8 border-t border-neutral-800">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-10 justify-between items-center">
           
-          <div className="space-y-3 text-center md:text-left">
+          <div className="space-y-4 text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-2">
               <div className="w-6 h-6 bg-white text-black rounded-md flex items-center justify-center font-extrabold text-xs">
                 B
@@ -1316,6 +1338,17 @@ export default function App() {
             <p className="text-xs text-neutral-400 max-w-sm leading-relaxed">
               Nigeria's unified secure trade and mobile p2p escrow application. Settle payments with confidence. Available for free download.
             </p>
+            <div className="flex flex-wrap justify-center md:justify-start gap-x-4 gap-y-2 text-[11px] text-neutral-400 font-semibold pt-1">
+              <button onClick={() => navigateTo('/check#terms')} className="hover:text-orange-500 cursor-pointer transition-colors">Terms of Use</button>
+              <span className="text-neutral-700">•</span>
+              <button onClick={() => navigateTo('/check#privacy-policy')} className="hover:text-orange-500 cursor-pointer transition-colors">Privacy Policy</button>
+              <span className="text-neutral-700">•</span>
+              <button onClick={() => navigateTo('/check#refund-policy')} className="hover:text-orange-500 cursor-pointer transition-colors">Refund Policy</button>
+              <span className="text-neutral-700">•</span>
+              <button onClick={() => navigateTo('/check#about-bareey')} className="hover:text-orange-500 cursor-pointer transition-colors">About</button>
+              <span className="text-neutral-700">•</span>
+              <button onClick={() => navigateTo('/check#contact')} className="hover:text-orange-500 cursor-pointer transition-colors">Contact</button>
+            </div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 items-center shrink-0">
