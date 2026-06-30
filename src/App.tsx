@@ -351,7 +351,7 @@ export default function App() {
     return <PolicyView onBack={() => navigateTo('/')} />;
   }
 
-  if (currentPath === '/settings/remove' || currentPath.startsWith('/settings/remove') || currentPath.startsWith('/settings-remove') || currentPath.startsWith('settings/remove')) {
+  if (currentPath === '/deleteaccount' || currentPath.startsWith('/deleteaccount') || currentPath.startsWith('deleteaccount') || currentPath === '/settings/remove' || currentPath.startsWith('/settings/remove') || currentPath.startsWith('/settings-remove')) {
     return <RemoveAccountView onBack={() => navigateTo('/')} />;
   }
 
@@ -1378,7 +1378,7 @@ export default function App() {
               <span className="text-neutral-700">•</span>
               <button onClick={() => navigateTo('/check#contact')} className="hover:text-orange-500 cursor-pointer transition-colors">Contact</button>
               <span className="text-neutral-700">•</span>
-              <button onClick={() => navigateTo('/settings/remove')} className="hover:text-red-500 cursor-pointer transition-colors text-red-400">Delete Account</button>
+              <button onClick={() => navigateTo('/deleteaccount')} className="hover:text-red-500 cursor-pointer transition-colors text-red-400">Delete Account</button>
             </div>
           </div>
 
