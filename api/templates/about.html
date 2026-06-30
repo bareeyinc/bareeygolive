@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bareey - About Us</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-[#FBFBFA] text-gray-900 font-sans selection:bg-orange-100 selection:text-orange-900">
+
+    <!-- Ambient glow -->
+    <div class="absolute top-0 left-0 right-0 h-[400px] bg-gradient-to-b from-orange-500/5 to-transparent pointer-events-none z-0"></div>
+
+    <!-- Header Panel -->
+    <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 sm:px-6 lg:px-8 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <a href="/" class="p-2 -ml-2 bg-gray-50 hover:bg-gray-100 text-gray-500 hover:text-black rounded-xl transition-all flex items-center justify-center">
+                    <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                </a>
+                <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 bg-orange-600 text-white rounded-lg flex items-center justify-center font-extrabold text-sm shadow-sm">
+                        B
+                    </div>
+                    <div>
+                        <span class="font-black text-lg tracking-tight text-gray-950">bareey</span>
+                        <span class="text-[10px] text-gray-400 font-bold block leading-none">LEGAL & POLICY CENTER</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-full border border-emerald-100">
+                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                    Google Play Compliant
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative z-10">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+            
+            <!-- Left Sticky Sidebar Navigation -->
+            <aside class="lg:col-span-4 lg:sticky lg:top-24 h-fit space-y-6">
+                <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-2xs space-y-4">
+                    <div>
+                        <h3 class="text-xs font-black uppercase tracking-widest text-orange-600">Document Sections</h3>
+                        <p class="text-[11px] text-gray-400 mt-0.5">Quickly navigate between legal terms and policy agreements</p>
+                    </div>
+
+                    <!-- Sidebar Navigation Links -->
+                    <nav class="space-y-1">
+                        <a href="/terms-of-use" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all border bg-white text-gray-600 border-transparent hover:bg-gray-50 hover:text-black">
+                            <i data-lucide="file-text" class="w-4 h-4 text-gray-400"></i>
+                            <span>Terms of Use</span>
+                        </a>
+                        <a href="/privacy-policy" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all border bg-white text-gray-600 border-transparent hover:bg-gray-50 hover:text-black">
+                            <i data-lucide="shield" class="w-4 h-4 text-gray-400"></i>
+                            <span>Privacy Policy</span>
+                        </a>
+                        <a href="/refund-policy" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all border bg-white text-gray-600 border-transparent hover:bg-gray-50 hover:text-black">
+                            <i data-lucide="scale" class="w-4 h-4 text-gray-400"></i>
+                            <span>Refund Policy</span>
+                        </a>
+                        <a href="/about" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all border bg-orange-600 text-white border-orange-600 shadow-sm">
+                            <i data-lucide="info" class="w-4 h-4 text-white"></i>
+                            <span>About Bareey</span>
+                        </a>
+                        <a href="/contact" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all border bg-white text-gray-600 border-transparent hover:bg-gray-50 hover:text-black">
+                            <i data-lucide="phone" class="w-4 h-4 text-gray-400"></i>
+                            <span>Contact Details</span>
+                        </a>
+                    </nav>
+
+                    <div class="pt-4 border-t border-gray-50 text-[11px] text-gray-400 space-y-2">
+                        <div class="flex justify-between font-medium">
+                            <span>Last Updated:</span>
+                            <span class="text-gray-700 font-bold">June 30, 2026</span>
+                        </div>
+                        <div class="flex justify-between font-medium">
+                            <span>Version:</span>
+                            <span class="text-gray-700 font-bold">v2.4.1</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Right Detailed Content Pane -->
+            <main class="lg:col-span-8 space-y-8">
+                <section class="bg-white p-6 sm:p-10 rounded-3xl border border-gray-100 shadow-2xs space-y-6">
+                    
+                    <div class="flex items-center gap-3 pb-4 border-b border-gray-50">
+                        <div class="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center text-orange-600 shrink-0">
+                            <i data-lucide="info" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-black tracking-widest text-orange-600 uppercase font-sans">Section 4</span>
+                            <h2 class="text-xl sm:text-2xl font-black text-gray-950 tracking-tight">About Bareey</h2>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 text-xs sm:text-sm text-gray-600 leading-relaxed font-medium">
+                        <p>
+                            Bareey is an all-in-one Entertainment, Business, and Messaging platform. It features a
+                            fast messaging system that enables users to interact, post, manage, buy, sell, and explore
+                            communities.
+                        </p>
+                        <p>
+                            Bareey bridges the gap between fun, business, and communication, making it a powerful and
+                            modern tool for everyone.
+                        </p>
+                    </div>
+
+                </section>
+            </main>
+
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-100 bg-white py-8 mt-16 text-center text-xs text-gray-400">
+        <div class="max-w-7xl mx-auto px-4">
+            <p>© <span id="current-year"></span> Bareey Inc. Kaduna, Nigeria. Settle confidently.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('current-year').innerText = new Date().getFullYear();
+        lucide.createIcons();
+    </script>
+</body>
+</html>

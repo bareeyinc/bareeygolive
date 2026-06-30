@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bareey Web MVP Platform - Secure Escrow Trading</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-[#FBFBFA] text-gray-900 flex flex-col relative overflow-x-hidden selection:bg-orange-100 selection:text-orange-900">
+
+    <!-- Active Ribbon -->
+    <div class="bg-black text-white px-4 py-2.5 text-xs font-semibold flex flex-col sm:flex-row justify-between items-center gap-2 relative z-50 border-b border-neutral-800 shrink-0">
+        <div class="flex items-center gap-2">
+            <span class="bg-emerald-600 text-[10px] uppercase font-black px-1.5 py-0.5 rounded-sm">Active Sandbox</span>
+            <span>Bareey Web MVP Platform — Settle and Trade Safely:</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="/" class="px-3 py-1 bg-neutral-900 text-gray-400 hover:text-white rounded-lg font-bold text-[11px] uppercase tracking-wider transition-colors">
+                📱 Marketing & Simulator
+            </a>
+            <a href="/platform" class="px-3 py-1 bg-orange-600 text-white rounded-lg font-bold text-[11px] uppercase tracking-wider">
+                💻 Web MVP Platform
+            </a>
+        </div>
+    </div>
+
+    <!-- Header navigation -->
+    <header class="sticky top-0 z-40 bg-white border-b border-gray-150 shrink-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white font-black text-lg">
+                    <span class="text-orange-500">B</span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-black text-base tracking-tight text-gray-950">bareey</span>
+                    <span class="text-[9px] text-gray-400 font-extrabold tracking-wide uppercase leading-none">Web MVP v1.0</span>
+                </div>
+            </a>
+
+            <!-- Mode selector tabs -->
+            <nav class="hidden md:flex items-center gap-1 bg-gray-100 p-1 rounded-xl">
+                <button onclick="setTab('marketplace')" id="tab-marketplace" class="px-4 py-2 text-xs font-bold bg-white text-black shadow-xs rounded-lg transition-all flex items-center gap-1.5 cursor-pointer">
+                    <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i>
+                    <span>Marketplace</span>
+                </button>
+                <button onclick="setTab('services')" id="tab-services" class="px-4 py-2 text-xs font-bold text-gray-500 hover:text-black rounded-lg transition-all flex items-center gap-1.5 cursor-pointer">
+                    <i data-lucide="wrench" class="w-3.5 h-3.5"></i>
+                    <span>Services Directory</span>
+                </button>
+                <button onclick="setTab('chat')" id="tab-chat" class="px-4 py-2 text-xs font-bold text-gray-500 hover:text-black rounded-lg transition-all flex items-center gap-1.5 relative cursor-pointer">
+                    <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
+                    <span>Escrow Agreements</span>
+                    <span id="chat-badge" class="absolute -top-1 -right-1 w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span>
+                </button>
+                <button onclick="setTab('manager')" id="tab-manager" class="px-4 py-2 text-xs font-bold text-gray-500 hover:text-black rounded-lg transition-all flex items-center gap-1.5 cursor-pointer">
+                    <i data-lucide="store" class="w-3.5 h-3.5"></i>
+                    <span>Store Manager & Wallet</span>
+                </button>
+            </nav>
+
+            <div class="flex items-center gap-3">
+                <div class="hidden sm:flex flex-col text-right">
+                    <span class="text-[9px] font-black uppercase text-gray-400 tracking-wider">Secure Wallet Balance</span>
+                    <span id="header-wallet-bal" class="text-xs font-black text-orange-600">₦260,000</span>
+                </div>
+                <div class="w-8 h-8 rounded-full bg-orange-100 text-orange-700 flex items-center justify-center font-bold text-xs shadow-sm border border-orange-200">
+                    JD
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile navigation bar -->
+        <div class="md:hidden flex items-center justify-around border-t border-gray-150 py-2 bg-gray-50">
+            <button onclick="setTab('marketplace')" id="mtab-marketplace" class="flex flex-col items-center gap-0.5 text-orange-600 font-bold text-[9px]">
+                <i data-lucide="shopping-bag" class="w-4.5 h-4.5"></i>
+                <span>Market</span>
+            </button>
+            <button onclick="setTab('services')" id="mtab-services" class="flex flex-col items-center gap-0.5 text-gray-400 font-medium text-[9px]">
+                <i data-lucide="wrench" class="w-4.5 h-4.5"></i>
+                <span>Services</span>
+            </button>
+            <button onclick="setTab('chat')" id="mtab-chat" class="flex flex-col items-center gap-0.5 text-gray-400 font-medium text-[9px] relative">
+                <i data-lucide="message-square" class="w-4.5 h-4.5"></i>
+                <span>Chats</span>
+                <span id="mchat-badge" class="absolute top-0 right-1 w-1.5 h-1.5 bg-orange-500 rounded-full"></span>
+            </button>
+            <button onclick="setTab('manager')" id="mtab-manager" class="flex flex-col items-center gap-0.5 text-gray-400 font-medium text-[9px]">
+                <i data-lucide="store" class="w-4.5 h-4.5"></i>
+                <span>Store</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col min-h-0">
+        
+        <!-- Marketplace View -->
+        <div id="view-marketplace" class="space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100">
+                <div>
+                    <h2 class="text-xl font-extrabold text-gray-950">Product Marketplace</h2>
+                    <p class="text-xs text-gray-500">Secure p2p commerce. Click any product to create an instant escrow purchase order.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="text" id="market-search" oninput="filterMarket()" placeholder="Search products..." class="px-3.5 py-2 text-xs bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 w-full sm:w-56 font-medium text-gray-900">
+                    <button onclick="setTab('manager')" class="px-3.5 py-2 text-xs bg-black text-white hover:bg-gray-800 rounded-xl font-bold flex items-center gap-1 whitespace-nowrap cursor-pointer">
+                        <i data-lucide="plus" class="w-3.5 h-3.5 text-orange-400"></i>
+                        <span>Add Listing</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="market-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Products list will be injected here -->
+            </div>
+        </div>
+
+        <!-- Services View -->
+        <div id="view-services" class="hidden space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100">
+                <div>
+                    <h2 class="text-xl font-extrabold text-gray-950">Freelance Services Directory</h2>
+                    <p class="text-xs text-gray-500">Hire trusted providers. Payments are locked in escrow and only released upon delivery verification.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="text" id="service-search" oninput="filterServices()" placeholder="Search services..." class="px-3.5 py-2 text-xs bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 w-full sm:w-56 font-medium text-gray-900">
+                    <button onclick="setTab('manager')" class="px-3.5 py-2 text-xs bg-black text-white hover:bg-gray-800 rounded-xl font-bold flex items-center gap-1 whitespace-nowrap cursor-pointer">
+                        <i data-lucide="plus" class="w-3.5 h-3.5 text-orange-400"></i>
+                        <span>Add Service</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="services-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Services list will be injected here -->
+            </div>
+        </div>
+
+        <!-- Escrow Agreements (Chat Workspace) -->
+        <div id="view-chat" class="hidden flex-1 bg-white border border-gray-150 rounded-2xl overflow-hidden flex flex-col md:grid md:grid-cols-12 min-h-[500px] shadow-sm">
+            
+            <!-- Channels list (left) -->
+            <div class="md:col-span-4 border-r border-gray-150 flex flex-col min-h-0 bg-gray-50/50">
+                <div class="p-4 border-b border-gray-150 flex items-center justify-between shrink-0 bg-white">
+                    <h3 class="text-xs font-black uppercase tracking-wider text-gray-900">Your Escrow Agreements</h3>
+                    <span id="channels-count" class="text-[10px] bg-gray-100 px-2 py-0.5 rounded-full font-bold text-gray-500">3 Deals</span>
+                </div>
+                <div id="channels-list" class="flex-1 overflow-y-auto p-2 space-y-1">
+                    <!-- Channels will be injected here -->
+                </div>
+            </div>
+
+            <!-- Active chat pane (right) -->
+            <div class="md:col-span-8 flex flex-col min-h-0 relative bg-[#FAFBFB]">
+                <div id="chat-active-pane" class="flex-1 flex flex-col overflow-hidden">
+                    <!-- Active chat details and box injected here -->
+                </div>
+                <div id="chat-empty-pane" class="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-3">
+                    <div class="w-12 h-12 bg-gray-100 text-gray-400 rounded-2xl flex items-center justify-center">
+                        <i data-lucide="message-square" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-black text-gray-950 uppercase tracking-wide">Select a Trade Agreement</h4>
+                        <p class="text-[11px] text-gray-400 max-w-xs mt-1 leading-relaxed font-semibold">Click a deal channel on the left sidebar to manage agreements, chat, release payouts, or file active disputes.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Store Manager & Wallet -->
+        <div id="view-manager" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-10">
+            
+            <!-- Left Store Status & Add forms -->
+            <div class="lg:col-span-8 space-y-8">
+                
+                <!-- Wallet/Cashout card -->
+                <div class="bg-black text-white p-6 rounded-3xl space-y-6 relative overflow-hidden shadow-md">
+                    <div class="absolute right-[-10%] bottom-[-15%] w-48 h-48 bg-orange-500/10 rounded-full blur-2xl"></div>
+                    
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                        <div>
+                            <span class="text-[10px] uppercase font-black text-gray-400 tracking-wider">Account Revenue Manager</span>
+                            <h3 class="text-2xl font-extrabold text-orange-400 mt-1">₦260,000</h3>
+                            <p class="text-[11px] text-gray-400 mt-1">Held in secure escrow: ₦115,000</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold rounded-full uppercase tracking-wider flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
+                                Settlement Portal Open
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Instant cashout request form -->
+                    <form onsubmit="handleWithdraw(event)" class="bg-zinc-900 border border-zinc-800 p-4.5 rounded-2xl space-y-3.5 text-left">
+                        <h4 class="text-xs font-black uppercase tracking-wide text-gray-200">Instant Settlement Bank Cashout</h4>
+                        
+                        <div id="withdraw-toast" class="hidden p-3 rounded-lg text-[10px] font-bold"></div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-bold uppercase tracking-wide text-zinc-400">Withdraw Amount (₦)</label>
+                                <input id="w-amount" type="number" value="50000" min="500" max="260000" class="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-xs font-bold text-white focus:outline-none focus:border-orange-500">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-bold uppercase tracking-wide text-zinc-400">Target Bank</label>
+                                <select id="w-bank" class="w-full px-2.5 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-xs font-bold text-white focus:outline-none focus:border-orange-500">
+                                    <option value="Kuda Bank">Kuda Bank</option>
+                                    <option value="GTBank">Guaranty Trust Bank (GTB)</option>
+                                    <option value="Zenith Bank">Zenith Bank</option>
+                                    <option value="Moniepoint MFB">Moniepoint Microfinance</option>
+                                    <option value="Opay">Opay</option>
+                                </select>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-bold uppercase tracking-wide text-zinc-400">Account Number</label>
+                                <input id="w-acc" type="text" value="2014569822" placeholder="e.g. 2014569822" required class="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-xs font-bold text-white focus:outline-none focus:border-orange-500">
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pt-1">
+                            <p class="text-[10px] text-zinc-400 leading-tight">Settlements land within 3 minutes on any commercial bank network.</p>
+                            <button type="submit" id="w-btn" class="w-full sm:w-auto px-5 py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs font-black uppercase rounded-xl shadow-md transition-all cursor-pointer">
+                                Trigger Cashout
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Create Listing Form Panel -->
+                <div class="bg-white p-6 sm:p-8 rounded-3xl border border-gray-150 shadow-2xs space-y-6">
+                    <div>
+                        <h3 class="text-base font-extrabold text-gray-950">Add Products or Services to Bareey Listings</h3>
+                        <p class="text-xs text-gray-500 mt-1">Submit your items or freelance services. They will immediately become live and purchasable in the Sandbox directories!</p>
+                    </div>
+
+                    <form onsubmit="handleCreateListing(event)" class="space-y-4 text-xs">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-bold uppercase tracking-wider text-gray-600">Listing Type</label>
+                                <select id="list-type" onchange="toggleFormInputs()" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl font-semibold text-gray-900 focus:outline-none focus:border-orange-500">
+                                    <option value="product">Physical Product Listing</option>
+                                    <option value="service">Freelance Service Listing</option>
+                                </select>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-bold uppercase tracking-wider text-gray-600">Item / Service Name</label>
+                                <input id="list-title" type="text" placeholder="e.g. Designer Leather Bag" required class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl font-semibold text-gray-900 focus:outline-none focus:border-orange-500">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-bold uppercase tracking-wider text-gray-600">Price (₦)</label>
+                                <input id="list-price" type="number" placeholder="e.g. 45000" required class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl font-semibold text-gray-900 focus:outline-none focus:border-orange-500">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-bold uppercase tracking-wider text-gray-600">Vendor / Seller Username</label>
+                                <input id="list-seller" type="text" placeholder="e.g. Bola Boutique" required class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl font-semibold text-gray-900 focus:outline-none focus:border-orange-500">
+                            </div>
+                            <div class="space-y-1" id="list-specific-label">
+                                <label class="text-[10px] font-bold uppercase tracking-wider text-gray-600">Condition / Quality</label>
+                                <input id="list-specific-val" type="text" placeholder="e.g. Brand New" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl font-semibold text-gray-900 focus:outline-none focus:border-orange-500">
+                            </div>
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold uppercase tracking-wider text-gray-600">Description / Specifications</label>
+                            <textarea id="list-desc" rows="3" placeholder="Detail any conditions, shipping details, or delivery timeframes..." required class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl font-semibold text-gray-900 focus:outline-none focus:border-orange-500"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-extrabold uppercase rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-1.5">
+                            <i data-lucide="store" class="w-4.5 h-4.5"></i>
+                            <span>Deploy Live Sandbox Listing</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right My Active Store List -->
+            <div class="lg:col-span-4 space-y-6">
+                <div class="bg-white p-5 rounded-2xl border border-gray-150 shadow-3xs space-y-4">
+                    <div>
+                        <h4 class="text-xs font-black uppercase tracking-wider text-gray-900">Your Deployed Sandbox Listings</h4>
+                        <p class="text-[11px] text-gray-400 mt-1">Live products and services published by your mock store</p>
+                    </div>
+
+                    <div id="user-listings-box" class="space-y-2 max-h-[350px] overflow-y-auto">
+                        <!-- Deployed store listings go here -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-150 bg-white py-8 mt-16 text-center text-xs text-gray-400 shrink-0">
+        <div class="max-w-7xl mx-auto px-4">
+            <p>© <span id="current-year"></span> Bareey Inc. Kaduna, Nigeria. Settle confidently.</p>
+        </div>
+    </footer>
+
+    <!-- Interactive script -->
+    <script>
+        document.getElementById('current-year').innerText = new Date().getFullYear();
+
+        // Marketplace Data
+        let products = [
+            { id: 'p-1', title: 'MacBook Pro 16" M2 Max', price: 2450000, seller: 'Tunde Gadgets Ltd', condition: 'Brand New', desc: 'Secure Apple Silicon MacBook Pro. 32GB RAM, 1TB SSD. Escrow covers full inspect duration before releasing fund.', img: '💻' },
+            { id: 'p-2', title: 'Designer Saffiano Leather Handbag', price: 185000, seller: 'Zizi Luxe Store', condition: 'Gently Used', desc: 'Authentic leather with complete dustbag and validation card. Verified luxury shipping escrow protection.', img: '👜' },
+            { id: 'p-3', title: 'Apple AirPods Pro 2nd Gen', price: 295000, seller: 'Alhaji Tech Palace', condition: 'Open Box', desc: 'Active noise cancelling fully verified. Escrow guarantees refund if authenticity test fails.', img: '🎧' }
+        ];
+
+        // Services Data
+        let services = [
+            { id: 's-1', title: 'Full Technical SEO & Speed Audit', price: 120000, seller: 'Umar SEO Specialist', duration: '5 days', desc: 'Complete site speed score enhancement, schema audits, and rank leakage reports. Payout on draft verify.', img: '📈' },
+            { id: 's-2', title: 'Premium Corporate Brand Identity Logo', price: 75000, seller: 'Ngozi Designs Co.', duration: '3 days', desc: 'Includes 3 custom concepts, vectors, and design guide files. Safe milestone escrow payments only.', img: '🎨' },
+            { id: 's-3', title: 'Custom API Backend Server Development', price: 350000, seller: 'Ibrahim Node.js Dev', duration: '7 days', desc: 'Secure, clean Node Express REST APIs and JWT setup. Settle safely upon live staging deployment approval.', img: '⚙️' }
+        ];
+
+        // Agreements / Chats Data
+        let agreements = [
+            {
+                id: 'deal-101',
+                title: 'Double Chocolate Custom Cake',
+                party: 'Chef Amina Bello',
+                amount: 45000,
+                role: 'buyer',
+                type: 'Product',
+                status: 'held',
+                messages: [
+                    { sender: 'system', text: "Deal created. Chef Amina Bello accepted. You deposited ₦45,000 into secure Escrow.", time: "10:30 AM" },
+                    { sender: 'seller', text: "Hello! Designing custom chocolate lettering now. When do you need pick up?", time: "10:32 AM" },
+                    { sender: 'buyer', text: "Hi Amina! Saturday morning please. Priority dispatch so the cream doesn't run.", time: "10:35 AM" }
+                ]
+            },
+            {
+                id: 'deal-102',
+                title: 'Tech Store - AirPods Pro 2nd Gen Purchase',
+                party: 'Alhaji Tech Palace',
+                amount: 295000,
+                role: 'buyer',
+                type: 'Product',
+                status: 'shipped',
+                messages: [
+                    { sender: 'system', text: "Deal created. Alhaji Tech Palace accepted. You deposited ₦295,000 into Escrow.", time: "Yesterday" },
+                    { sender: 'seller', text: "Package handed to GIG logistics. Tracker: GIG-88241-KAD.", time: "Yesterday" },
+                    { sender: 'system', text: "Seller marked shipment status as SHIPPED/DISPATCHED.", time: "Yesterday" },
+                    { sender: 'buyer', text: "Tracking says it arrived at the Kaduna terminal. Collecting it now for inspection.", time: "9:00 AM" }
+                ]
+            }
+        ];
+
+        let activeTab = 'marketplace';
+        let activeChatId = '';
+
+        // Render functions
+        function renderMarketplace() {
+            const grid = document.getElementById('market-grid');
+            grid.innerHTML = '';
+            products.forEach(p => {
+                grid.innerHTML += `
+                    <div class="bg-white border border-gray-150 rounded-2xl p-5 hover:border-orange-300 hover:shadow-sm transition-all flex flex-col justify-between space-y-4">
+                        <div class="space-y-3">
+                            <div class="w-12 h-12 bg-orange-50 text-2xl flex items-center justify-center rounded-xl shrink-0">
+                                ${p.img}
+                            </div>
+                            <div>
+                                <div class="flex items-start justify-between gap-2">
+                                    <h3 class="text-xs font-black text-gray-950">${p.title}</h3>
+                                    <span class="inline-block text-[9px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-sm font-bold shrink-0">${p.condition}</span>
+                                </div>
+                                <p class="text-[10px] text-gray-400 mt-1">Vendor: ${p.seller}</p>
+                            </div>
+                            <p class="text-[11px] text-gray-500 leading-relaxed font-semibold">${p.desc}</p>
+                        </div>
+
+                        <div class="flex justify-between items-center pt-3 border-t border-gray-50 gap-4">
+                            <div>
+                                <span class="text-[9px] uppercase font-black text-gray-400 block tracking-wider">Escrow Price</span>
+                                <span class="text-sm font-black text-orange-600">₦${p.price.toLocaleString()}</span>
+                            </div>
+                            <button onclick="requestEscrow('${p.id}', 'product')" class="px-3.5 py-2 text-[10px] font-black uppercase tracking-wider text-white bg-black hover:bg-gray-800 rounded-xl transition-colors cursor-pointer flex items-center gap-1">
+                                <i data-lucide="shield" class="w-3.5 h-3.5 text-orange-400"></i>
+                                <span>Buy Safe</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            lucide.createIcons();
+        }
+
+        function renderServices() {
+            const grid = document.getElementById('services-grid');
+            grid.innerHTML = '';
+            services.forEach(s => {
+                grid.innerHTML += `
+                    <div class="bg-white border border-gray-150 rounded-2xl p-5 hover:border-orange-300 hover:shadow-sm transition-all flex flex-col justify-between space-y-4">
+                        <div class="space-y-3">
+                            <div class="w-12 h-12 bg-orange-50 text-2xl flex items-center justify-center rounded-xl shrink-0">
+                                ${s.img}
+                            </div>
+                            <div>
+                                <div class="flex items-start justify-between gap-2">
+                                    <h3 class="text-xs font-black text-gray-950">${s.title}</h3>
+                                    <span class="inline-block text-[9px] bg-orange-50 text-orange-600 border border-orange-100 px-2 py-0.5 rounded-sm font-bold shrink-0">${s.duration}</span>
+                                </div>
+                                <p class="text-[10px] text-gray-400 mt-1">Provider: ${s.seller}</p>
+                            </div>
+                            <p class="text-[11px] text-gray-500 leading-relaxed font-semibold">${s.desc}</p>
+                        </div>
+
+                        <div class="flex justify-between items-center pt-3 border-t border-gray-50 gap-4">
+                            <div>
+                                <span class="text-[9px] uppercase font-black text-gray-400 block tracking-wider">Escrow Rate</span>
+                                <span class="text-sm font-black text-orange-600">₦${s.price.toLocaleString()}</span>
+                            </div>
+                            <button onclick="requestEscrow('${s.id}', 'service')" class="px-3.5 py-2 text-[10px] font-black uppercase tracking-wider text-white bg-black hover:bg-gray-800 rounded-xl transition-colors cursor-pointer flex items-center gap-1">
+                                <i data-lucide="wrench" class="w-3.5 h-3.5 text-orange-400"></i>
+                                <span>Hire Seller</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            lucide.createIcons();
+        }
+
+        function filterMarket() {
+            const val = document.getElementById('market-search').value.toLowerCase();
+            const grid = document.getElementById('market-grid');
+            grid.innerHTML = '';
+            products.filter(p => p.title.toLowerCase().includes(val) || p.desc.toLowerCase().includes(val) || p.seller.toLowerCase().includes(val)).forEach(p => {
+                grid.innerHTML += `
+                    <div class="bg-white border border-gray-150 rounded-2xl p-5 hover:border-orange-300 hover:shadow-sm transition-all flex flex-col justify-between space-y-4">
+                        <div class="space-y-3">
+                            <div class="w-12 h-12 bg-orange-50 text-2xl flex items-center justify-center rounded-xl shrink-0">
+                                ${p.img}
+                            </div>
+                            <div>
+                                <div class="flex items-start justify-between gap-2">
+                                    <h3 class="text-xs font-black text-gray-950">${p.title}</h3>
+                                    <span class="inline-block text-[9px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-sm font-bold shrink-0">${p.condition}</span>
+                                </div>
+                                <p class="text-[10px] text-gray-400 mt-1">Vendor: ${p.seller}</p>
+                            </div>
+                            <p class="text-[11px] text-gray-500 leading-relaxed font-semibold">${p.desc}</p>
+                        </div>
+
+                        <div class="flex justify-between items-center pt-3 border-t border-gray-50 gap-4">
+                            <div>
+                                <span class="text-[9px] uppercase font-black text-gray-400 block tracking-wider">Escrow Price</span>
+                                <span class="text-sm font-black text-orange-600">₦${p.price.toLocaleString()}</span>
+                            </div>
+                            <button onclick="requestEscrow('${p.id}', 'product')" class="px-3.5 py-2 text-[10px] font-black uppercase tracking-wider text-white bg-black hover:bg-gray-800 rounded-xl transition-colors cursor-pointer flex items-center gap-1">
+                                <i data-lucide="shield" class="w-3.5 h-3.5 text-orange-400"></i>
+                                <span>Buy Safe</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            lucide.createIcons();
+        }
+
+        function filterServices() {
+            const val = document.getElementById('service-search').value.toLowerCase();
+            const grid = document.getElementById('services-grid');
+            grid.innerHTML = '';
+            services.filter(s => s.title.toLowerCase().includes(val) || s.desc.toLowerCase().includes(val) || s.seller.toLowerCase().includes(val)).forEach(s => {
+                grid.innerHTML += `
+                    <div class="bg-white border border-gray-150 rounded-2xl p-5 hover:border-orange-300 hover:shadow-sm transition-all flex flex-col justify-between space-y-4">
+                        <div class="space-y-3">
+                            <div class="w-12 h-12 bg-orange-50 text-2xl flex items-center justify-center rounded-xl shrink-0">
+                                ${s.img}
+                            </div>
+                            <div>
+                                <div class="flex items-start justify-between gap-2">
+                                    <h3 class="text-xs font-black text-gray-950">${s.title}</h3>
+                                    <span class="inline-block text-[9px] bg-orange-50 text-orange-600 border border-orange-100 px-2 py-0.5 rounded-sm font-bold shrink-0">${s.duration}</span>
+                                </div>
+                                <p class="text-[10px] text-gray-400 mt-1">Provider: ${s.seller}</p>
+                            </div>
+                            <p class="text-[11px] text-gray-500 leading-relaxed font-semibold">${s.desc}</p>
+                        </div>
+
+                        <div class="flex justify-between items-center pt-3 border-t border-gray-50 gap-4">
+                            <div>
+                                <span class="text-[9px] uppercase font-black text-gray-400 block tracking-wider">Escrow Rate</span>
+                                <span class="text-sm font-black text-orange-600">₦${s.price.toLocaleString()}</span>
+                            </div>
+                            <button onclick="requestEscrow('${s.id}', 'service')" class="px-3.5 py-2 text-[10px] font-black uppercase tracking-wider text-white bg-black hover:bg-gray-800 rounded-xl transition-colors cursor-pointer flex items-center gap-1">
+                                <i data-lucide="wrench" class="w-3.5 h-3.5 text-orange-400"></i>
+                                <span>Hire Seller</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            lucide.createIcons();
+        }
+
+        function setTab(tab) {
+            activeTab = tab;
+            // Update active views
+            ['marketplace', 'services', 'chat', 'manager'].forEach(t => {
+                const view = document.getElementById(`view-${t}`);
+                const btn = document.getElementById(`tab-${t}`);
+                const mbtn = document.getElementById(`mtab-${t}`);
+
+                if (t === tab) {
+                    view.classList.remove('hidden');
+                    if (btn) btn.className = "px-4 py-2 text-xs font-bold bg-white text-black shadow-xs rounded-lg transition-all flex items-center gap-1.5 cursor-pointer";
+                    if (mbtn) mbtn.className = "flex flex-col items-center gap-0.5 text-orange-600 font-bold text-[9px]";
+                } else {
+                    view.classList.add('hidden');
+                    if (btn) {
+                        if (t === 'chat') {
+                            btn.className = "px-4 py-2 text-xs font-bold text-gray-500 hover:text-black rounded-lg transition-all flex items-center gap-1.5 relative cursor-pointer";
+                        } else {
+                            btn.className = "px-4 py-2 text-xs font-bold text-gray-500 hover:text-black rounded-lg transition-all flex items-center gap-1.5 cursor-pointer";
+                        }
+                    }
+                    if (mbtn) mbtn.className = "flex flex-col items-center gap-0.5 text-gray-400 font-medium text-[9px]";
+                }
+            });
+
+            if (tab === 'chat') {
+                document.getElementById('chat-badge').classList.add('hidden');
+                document.getElementById('mchat-badge').classList.add('hidden');
+                renderChannels();
+            } else if (tab === 'manager') {
+                renderUserListings();
+            }
+
+            lucide.createIcons();
+        }
+
+        // Add item to active store list
+        function renderUserListings() {
+            const box = document.getElementById('user-listings-box');
+            box.innerHTML = '';
+            
+            // Render user custom products
+            const myProds = products.filter(p => p.seller === 'Bola Boutique' || p.seller === 'You (Mock Store)');
+            const myServs = services.filter(s => s.seller === 'Bola Boutique' || s.seller === 'You (Mock Store)');
+
+            if (myProds.length === 0 && myServs.length === 0) {
+                box.innerHTML = `<p class="text-center text-[10px] text-gray-400 font-semibold py-4">No listings deployed in your mock store yet.</p>`;
+                return;
+            }
+
+            myProds.forEach(p => {
+                box.innerHTML += `
+                    <div class="p-3 bg-gray-50 border border-gray-100 rounded-xl flex justify-between items-center text-[10px]">
+                        <div>
+                            <p class="font-extrabold text-gray-900">${p.title}</p>
+                            <p class="text-[8px] text-gray-400">Physical Product • ${p.condition}</p>
+                        </div>
+                        <span class="font-black text-orange-600 shrink-0">₦${p.price.toLocaleString()}</span>
+                    </div>
+                `;
+            });
+
+            myServs.forEach(s => {
+                box.innerHTML += `
+                    <div class="p-3 bg-gray-50 border border-gray-100 rounded-xl flex justify-between items-center text-[10px]">
+                        <div>
+                            <p class="font-extrabold text-gray-900">${s.title}</p>
+                            <p class="text-[8px] text-gray-400">Freelance Service • Delivery ${s.duration}</p>
+                        </div>
+                        <span class="font-black text-orange-600 shrink-0">₦${s.price.toLocaleString()}</span>
+                    </div>
+                `;
+            });
+        }
+
+        function toggleFormInputs() {
+            const type = document.getElementById('list-type').value;
+            const lbl = document.getElementById('list-specific-label');
+            if (type === 'product') {
+                lbl.innerHTML = `
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-gray-600">Condition / Quality</label>
+                    <input id="list-specific-val" type="text" placeholder="e.g. Brand New" required class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl font-semibold text-gray-900 focus:outline-none focus:border-orange-500">
+                `;
+            } else {
+                lbl.innerHTML = `
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-gray-600">Delivery Frame</label>
+                    <input id="list-specific-val" type="text" placeholder="e.g. 5 days" required class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl font-semibold text-gray-900 focus:outline-none focus:border-orange-500">
+                `;
+            }
+        }
+
+        function handleCreateListing(e) {
+            e.preventDefault();
+            const type = document.getElementById('list-type').value;
+            const title = document.getElementById('list-title').value;
+            const price = parseFloat(document.getElementById('list-price').value) || 0;
+            const seller = document.getElementById('list-seller').value;
+            const specVal = document.getElementById('list-specific-val').value;
+            const desc = document.getElementById('list-desc').value;
+
+            if (!title || price <= 0 || !seller || !desc || !specVal) return;
+
+            if (type === 'product') {
+                products.unshift({
+                    id: `p-${Date.now()}`,
+                    title: title,
+                    price: price,
+                    seller: seller,
+                    condition: specVal,
+                    desc: desc,
+                    img: '📦'
+                });
+                renderMarketplace();
+            } else {
+                services.unshift({
+                    id: `s-${Date.now()}`,
+                    title: title,
+                    price: price,
+                    seller: seller,
+                    duration: specVal,
+                    desc: desc,
+                    img: '🛠️'
+                });
+                renderServices();
+            }
+
+            // Reset Form
+            document.getElementById('list-title').value = '';
+            document.getElementById('list-price').value = '';
+            document.getElementById('list-seller').value = '';
+            document.getElementById('list-desc').value = '';
+            document.getElementById('list-specific-val').value = '';
+
+            alert('Listing successfully deployed live in Sandbox!');
+            renderUserListings();
+        }
+
+        function requestEscrow(itemId, itemType) {
+            let item;
+            if (itemType === 'product') {
+                item = products.find(p => p.id === itemId);
+            } else {
+                item = services.find(s => s.id === itemId);
+            }
+
+            if (!item) return;
+
+            // Check if deal already exists
+            const existing = agreements.find(a => a.title.includes(item.title));
+            if (existing) {
+                setTab('chat');
+                selectChannel(existing.id);
+                return;
+            }
+
+            const newDeal = {
+                id: `deal-${Date.now()}`,
+                title: `${itemType === 'product' ? 'Purchase' : 'Hire'} - ${item.title}`,
+                party: item.seller,
+                amount: item.price,
+                role: 'buyer',
+                type: itemType === 'product' ? 'Product' : 'Service',
+                status: 'held',
+                messages: [
+                    { sender: 'system', text: `Deal created. You deposited ₦${item.price.toLocaleString()} into Bareey Escrow.`, time: "Just now" },
+                    { sender: 'system', text: `Vendor ${item.seller} notified. Fully secured.`, time: "Just now" },
+                    { sender: 'seller', text: `Hello! Thanks for funding escrow. I will begin processing your order immediately.`, time: "Just now" }
+                ]
+            };
+
+            agreements.unshift(newDeal);
+            alert(`Escrow Funded successfully! ₦${item.price.toLocaleString()} has been locked in safe hold. Let's head to the secure chat agreement loop!`);
+            setTab('chat');
+            selectChannel(newDeal.id);
+        }
+
+        // Render channels sidebar list
+        function renderChannels() {
+            const list = document.getElementById('channels-list');
+            list.innerHTML = '';
+            document.getElementById('channels-count').innerText = `${agreements.length} Deals`;
+
+            agreements.forEach(deal => {
+                let statusText = "Held in Escrow";
+                let badgeClass = "bg-orange-50 text-orange-700 border-orange-100";
+                if (deal.status === 'shipped') {
+                    statusText = "Shipped / In Transit";
+                    badgeClass = "bg-blue-50 text-blue-700 border-blue-100";
+                } else if (deal.status === 'released') {
+                    statusText = "Released & Settled";
+                    badgeClass = "bg-emerald-50 text-emerald-700 border-emerald-100";
+                } else if (deal.status === 'disputed') {
+                    statusText = "Arbitration Active";
+                    badgeClass = "bg-red-50 text-red-700 border-red-100";
+                }
+
+                const isActive = deal.id === activeChatId;
+
+                list.innerHTML += `
+                    <div onclick="selectChannel('${deal.id}')" class="p-3 rounded-xl transition-all border cursor-pointer flex justify-between items-center ${isActive ? 'bg-orange-50/40 border-orange-200 shadow-3xs' : 'bg-white border-gray-100 hover:border-gray-200'}">
+                        <div class="space-y-0.5 overflow-hidden">
+                            <p class="text-[11px] font-extrabold text-gray-950 truncate leading-tight">${deal.title}</p>
+                            <p class="text-[8px] text-gray-400">With ${deal.party} • ${deal.type}</p>
+                        </div>
+                        <div class="text-right shrink-0 ml-2 space-y-0.5">
+                            <p class="text-[11px] font-black text-gray-950">₦${deal.amount.toLocaleString()}</p>
+                            <span class="inline-block text-[7px] font-bold px-1.5 py-0.5 rounded-xs border ${badgeClass}">
+                                ${statusText}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function selectChannel(id) {
+            activeChatId = id;
+            document.getElementById('chat-empty-pane').classList.add('hidden');
+            document.getElementById('chat-active-pane').classList.remove('hidden');
+
+            renderChannels(); // Updates active styles in sidebar
+
+            const deal = agreements.find(a => a.id === id);
+            if (!deal) return;
+
+            // Render active messages
+            let msgsHTML = '';
+            deal.messages.forEach(msg => {
+                if (msg.sender === 'system') {
+                    msgsHTML += `
+                        <div class="flex justify-center my-2">
+                            <div class="bg-gray-100 border border-gray-200/50 rounded-xl px-3 py-1.5 max-w-[85%] text-center">
+                                <p class="text-[9px] font-bold text-gray-500 leading-normal">${msg.text}</p>
+                                <span class="text-[7px] text-gray-400 block mt-0.5">${msg.time}</span>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    const isMe = msg.sender === deal.role;
+                    msgsHTML += `
+                        <div class="flex ${isMe ? 'justify-end' : 'justify-start'} my-1">
+                            <div class="max-w-[75%] rounded-2xl p-3 text-xs leading-relaxed shadow-3xs ${isMe ? 'bg-black text-white rounded-tr-none' : 'bg-white border border-gray-150 text-gray-900 rounded-tl-none'}">
+                                <p>${msg.text}</p>
+                                <span class="text-[7px] block mt-1.5 text-right text-gray-400">${msg.time}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            // Set Action Block HTML
+            let actionBlock = '';
+            if (deal.status === 'held') {
+                if (deal.role === 'buyer') {
+                    actionBlock = `<p class="text-center text-[10px] text-gray-400 font-semibold py-2">Awaiting dispatch of goods/services from ${deal.party}...</p>`;
+                } else {
+                    actionBlock = `
+                        <button onclick="dispatchAgreement('${deal.id}')" class="w-full py-2 bg-orange-600 hover:bg-orange-700 text-white font-extrabold text-[10px] uppercase rounded-xl flex items-center justify-center gap-1 cursor-pointer shadow-xs">
+                            <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+                            <span>Mark Delivery Dispatch / Shipped</span>
+                        </button>
+                    `;
+                }
+            } else if (deal.status === 'shipped') {
+                if (deal.role === 'buyer') {
+                    actionBlock = `
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="releaseAgreement('${deal.id}')" class="py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[10px] uppercase rounded-xl flex items-center justify-center gap-1 cursor-pointer shadow-xs">
+                                <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                                <span>Verify & Release Payout</span>
+                            </button>
+                            <button onclick="disputeAgreement('${deal.id}')" class="py-2.5 bg-red-50 text-red-700 border border-red-100 hover:bg-red-100 font-extrabold text-[10px] uppercase rounded-xl flex items-center justify-center gap-1 cursor-pointer">
+                                <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
+                                <span>File Escrow Dispute</span>
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    actionBlock = `<p class="text-center text-[10px] text-gray-400 font-semibold py-2">Awaiting package inspection and payout release approval from ${deal.party}...</p>`;
+                }
+            } else if (deal.status === 'released') {
+                actionBlock = `
+                    <div class="bg-emerald-50 text-emerald-800 border border-emerald-100 p-2 rounded-xl text-center flex items-center justify-center gap-1.5">
+                        <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i>
+                        <span class="text-xs font-black uppercase tracking-wide">Payout Released! Funds fully settled.</span>
+                    </div>
+                `;
+            } else if (deal.status === 'disputed') {
+                actionBlock = `
+                    <div class="bg-red-50 text-red-800 border border-red-100 p-2 rounded-xl text-center flex items-center justify-center gap-1.5">
+                        <i data-lucide="shield-alert" class="w-4 h-4 text-red-600"></i>
+                        <span class="text-xs font-black uppercase tracking-wide">Arbitration Panel Active. Files under review.</span>
+                    </div>
+                `;
+            }
+
+            const pane = document.getElementById('chat-active-pane');
+            pane.innerHTML = `
+                <!-- Chat Top Info Bar -->
+                <div class="bg-white border-b border-gray-150 p-4 flex items-center justify-between shrink-0">
+                    <div>
+                        <h4 class="text-xs font-black text-gray-950 uppercase tracking-wide leading-none">${deal.title}</h4>
+                        <p class="text-[9px] text-gray-400 mt-1.5 font-bold">Counterparty: ${deal.party} • Escrow ID: ${deal.id}</p>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <span class="text-[9px] uppercase font-black text-gray-400 block tracking-wider leading-none">Agreement Amount</span>
+                        <span class="text-base font-black text-orange-600">₦${deal.amount.toLocaleString()}</span>
+                    </div>
+                </div>
+
+                <!-- Messages box -->
+                <div id="messages-list-box" class="flex-1 p-4 overflow-y-auto space-y-3 bg-gray-50/40">
+                    ${msgsHTML}
+                </div>
+
+                <!-- Action buttons and input form -->
+                <div class="p-3 bg-white border-t border-gray-150 space-y-3 shrink-0">
+                    ${actionBlock}
+
+                    ${deal.status !== 'released' && deal.status !== 'disputed' ? `
+                        <div class="flex items-center gap-2">
+                            <input id="chat-msg-input" type="text" placeholder="Type secure message..." onkeydown="handleChatInputKey(event)" class="flex-1 bg-gray-50 text-gray-950 border border-gray-200 text-xs rounded-xl px-4 py-2.5 focus:bg-white focus:outline-none focus:border-orange-500 font-semibold">
+                            <button onclick="sendChatMessage()" class="p-2.5 bg-black hover:bg-gray-800 text-white rounded-xl transition-colors cursor-pointer shrink-0">
+                                <i data-lucide="send" class="w-4 h-4 text-orange-400"></i>
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+
+            // Scroll to bottom of chat
+            setTimeout(() => {
+                const box = document.getElementById('messages-list-box');
+                if (box) box.scrollTop = box.scrollHeight;
+            }, 50);
+
+            lucide.createIcons();
+        }
+
+        function handleChatInputKey(event) {
+            if (event.key === 'Enter') {
+                sendChatMessage();
+            }
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chat-msg-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const deal = agreements.find(a => a.id === activeChatId);
+            if (!deal) return;
+
+            deal.messages.push({
+                sender: deal.role,
+                text: text,
+                time: "Just now"
+            });
+
+            input.value = '';
+            selectChannel(activeChatId);
+
+            // Mock automatic merchant reply
+            setTimeout(() => {
+                let reply = "Got it! Let me know if you need any adjustments.";
+                if (deal.status === 'held') {
+                    reply = "Excellent. I have updated my logs. Dispatched shipping tracker shortly.";
+                } else if (deal.status === 'shipped') {
+                    reply = "Thank you! Please inspect the delivery and release payment as soon as confirmed.";
+                }
+
+                deal.messages.push({
+                    sender: 'seller',
+                    text: reply,
+                    time: "Just now"
+                });
+                selectChannel(activeChatId);
+            }, 1200);
+        }
+
+        function dispatchAgreement(id) {
+            const deal = agreements.find(a => a.id === id);
+            if (deal) {
+                deal.status = 'shipped';
+                deal.messages.push({
+                    sender: 'system',
+                    text: "Seller marked the delivery as dispatched/shipped. Awaiting buyer inspection and release approval.",
+                    time: "Just now"
+                });
+                selectChannel(id);
+            }
+        }
+
+        function releaseAgreement(id) {
+            const deal = agreements.find(a => a.id === id);
+            if (deal) {
+                deal.status = 'released';
+                deal.messages.push({
+                    sender: 'system',
+                    text: `Buyer verified and released payment. ₦${deal.amount.toLocaleString()} payout has been settled to the vendor wallet!`,
+                    time: "Just now"
+                });
+                selectChannel(id);
+            }
+        }
+
+        function disputeAgreement(id) {
+            const deal = agreements.find(a => a.id === id);
+            if (deal) {
+                deal.status = 'disputed';
+                deal.messages.push({
+                    sender: 'system',
+                    text: "Dispute file opened. Arbitrators are now joined and reviewing the trade agreements and delivery records.",
+                    time: "Just now"
+                });
+                selectChannel(id);
+            }
+        }
+
+        // Cashout logic
+        let walletBal = 260000;
+
+        function handleWithdraw(e) {
+            e.preventDefault();
+            const amt = parseFloat(document.getElementById('w-amount').value) || 0;
+            const bank = document.getElementById('w-bank').value;
+            const acc = document.getElementById('w-acc').value;
+            const btn = document.getElementById('w-btn');
+            const toast = document.getElementById('withdraw-toast');
+
+            if (amt < 500) {
+                showWithdrawToast('error', 'Minimum withdrawal amount is ₦500.');
+                return;
+            }
+
+            if (amt > walletBal) {
+                showWithdrawToast('error', 'Insufficient wallet balance for this payout transaction.');
+                return;
+            }
+
+            // Start withdrawal animation
+            btn.disabled = true;
+            btn.innerText = 'PROCESSING CASHOUT...';
+
+            setTimeout(() => {
+                walletBal -= amt;
+                document.getElementById('header-wallet-bal').innerText = `₦${walletBal.toLocaleString()}`;
+                document.querySelector('#view-manager h3').innerText = `₦${walletBal.toLocaleString()}`;
+                
+                showWithdrawToast('success', `Cashout of ₦${amt.toLocaleString()} to ${bank} account (${acc}) completed successfully! Settling in bank lines.`);
+                
+                btn.disabled = false;
+                btn.innerText = 'Trigger Cashout';
+                document.getElementById('w-amount').value = walletBal;
+            }, 1500);
+        }
+
+        function showWithdrawToast(type, msg) {
+            const toast = document.getElementById('withdraw-toast');
+            toast.className = 'p-3 rounded-lg text-[10px] font-bold block';
+            if (type === 'success') {
+                toast.classList.add('bg-emerald-50', 'border', 'border-emerald-200', 'text-emerald-900');
+            } else {
+                toast.classList.add('bg-red-50', 'border', 'border-red-200', 'text-red-900');
+            }
+            toast.innerText = msg;
+        }
+
+        // Initialize Views
+        renderMarketplace();
+        renderServices();
+    </script>
+</body>
+</html>

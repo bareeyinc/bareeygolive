@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bareey - Page Not Found (404)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-[#FBFBFA] text-gray-900 flex flex-col justify-center relative overflow-x-hidden selection:bg-orange-100 selection:text-orange-900">
+
+    <!-- Ambient top glow -->
+    <div class="absolute top-0 left-0 right-0 h-[450px] bg-gradient-to-b from-orange-500/5 to-transparent pointer-events-none z-0"></div>
+
+    <!-- Main Container -->
+    <main class="max-w-md w-full mx-auto px-4 py-16 text-center relative z-10 space-y-8">
+        
+        <!-- Animated visual indicator -->
+        <div class="relative w-24 h-24 mx-auto flex items-center justify-center">
+            <div class="absolute inset-0 bg-orange-100/50 rounded-full blur-md animate-pulse"></div>
+            <div class="w-16 h-16 bg-white border border-gray-150 rounded-2xl flex items-center justify-center text-orange-600 shadow-2xs relative z-10">
+                <i data-lucide="compass" class="w-8 h-8 animate-spin-slow"></i>
+            </div>
+        </div>
+
+        <!-- Text Block -->
+        <div class="space-y-3">
+            <h1 class="text-6xl font-black text-gray-950 tracking-tight leading-none">404</h1>
+            <h2 class="text-lg font-black text-gray-900 uppercase tracking-wider">Page Not Found</h2>
+            <p class="text-xs text-gray-500 leading-relaxed font-semibold">
+                We couldn't locate the secure endpoint or document you are searching for. Please check the URL or use the quick links below.
+            </p>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="bg-white p-5 rounded-2xl border border-gray-150 shadow-3xs space-y-3">
+            <a href="/" class="w-full py-2.5 bg-black hover:bg-gray-800 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5">
+                <i data-lucide="home" class="w-4 h-4 text-orange-400"></i>
+                <span>Return to Home</span>
+            </a>
+            <div class="grid grid-cols-2 gap-2">
+                <a href="/deleteaccount" class="py-2 bg-gray-50 hover:bg-gray-100 text-red-600 font-extrabold text-[10px] uppercase rounded-xl border border-gray-100 transition-all cursor-pointer flex items-center justify-center gap-1">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                    <span>Delete Account</span>
+                </a>
+                <a href="/contact" class="py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 font-extrabold text-[10px] uppercase rounded-xl border border-gray-100 transition-all cursor-pointer flex items-center justify-center gap-1">
+                    <i data-lucide="phone" class="w-3.5 h-3.5"></i>
+                    <span>Contact Support</span>
+                </a>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="text-center text-xs text-gray-400 mt-8">
+        <p>© <span id="current-year"></span> Bareey Inc. Kaduna, Nigeria.</p>
+    </footer>
+
+    <script>
+        document.getElementById('current-year').innerText = new Date().getFullYear();
+        lucide.createIcons();
+    </script>
+</body>
+</html>
