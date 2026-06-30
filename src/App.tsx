@@ -347,7 +347,32 @@ export default function App() {
     }
   };
 
-  if (currentPath === '/check' || currentPath.startsWith('/check') || currentPath.startsWith('check')) {
+  if (
+    currentPath === '/check' || 
+    currentPath.startsWith('/check') || 
+    currentPath.startsWith('check') ||
+    currentPath === '/privacy' ||
+    currentPath.startsWith('/privacy') ||
+    currentPath.startsWith('privacy') ||
+    currentPath === '/privacy-policy' ||
+    currentPath.startsWith('/privacy-policy') ||
+    currentPath.startsWith('privacy-policy') ||
+    currentPath === '/terms' ||
+    currentPath.startsWith('/terms') ||
+    currentPath.startsWith('terms') ||
+    currentPath === '/terms-of-use' ||
+    currentPath.startsWith('/terms-of-use') ||
+    currentPath.startsWith('terms-of-use') ||
+    currentPath === '/refund-policy' ||
+    currentPath.startsWith('/refund-policy') ||
+    currentPath.startsWith('refund-policy') ||
+    currentPath === '/about' ||
+    currentPath.startsWith('/about') ||
+    currentPath.startsWith('about') ||
+    currentPath === '/contact' ||
+    currentPath.startsWith('/contact') ||
+    currentPath.startsWith('contact')
+  ) {
     return <PolicyView onBack={() => navigateTo('/')} />;
   }
 
