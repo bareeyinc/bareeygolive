@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import PlatformView from './PlatformView';
 import PolicyView from './PolicyView';
+import RemoveAccountView from './RemoveAccountView';
 
 // Play Store Link
 const BAREEY_PLAYSTORE_URL = "https://play.google.com/store/apps/details?id=com.bareeyinc.bareey&hl=en";
@@ -324,6 +325,10 @@ export default function App() {
 
   if (currentPath === '/check') {
     return <PolicyView onBack={() => navigateTo('/')} />;
+  }
+
+  if (currentPath === '/settings/remove' || currentPath === '/settings/remove/' || currentPath === '/settings-remove') {
+    return <RemoveAccountView onBack={() => navigateTo('/')} />;
   }
 
   return (
@@ -1348,6 +1353,8 @@ export default function App() {
               <button onClick={() => navigateTo('/check#about-bareey')} className="hover:text-orange-500 cursor-pointer transition-colors">About</button>
               <span className="text-neutral-700">•</span>
               <button onClick={() => navigateTo('/check#contact')} className="hover:text-orange-500 cursor-pointer transition-colors">Contact</button>
+              <span className="text-neutral-700">•</span>
+              <button onClick={() => navigateTo('/settings/remove')} className="hover:text-red-500 cursor-pointer transition-colors text-red-400">Delete Account</button>
             </div>
           </div>
 
