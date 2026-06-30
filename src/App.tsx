@@ -40,14 +40,38 @@ export default function App() {
   const [viewMode, setViewMode] = useState<'marketing' | 'platform'>('marketing');
 
   // Simple custom SPA routing for Google Play policies check
-  const [currentPath, setCurrentPath] = useState(() => window.location.pathname);
+  const getNormalizedPath = (): string => {
+    const pathname = window.location.pathname;
+    if (pathname && pathname !== '/') {
+      return pathname;
+    }
+    const hash = window.location.hash;
+    if (hash) {
+      const cleanHash = hash.startsWith('#/') ? hash.substring(1) : (hash.startsWith('#') ? hash.substring(1) : '');
+      if (cleanHash) {
+        return cleanHash.split('?')[0].split('#')[0];
+      }
+    }
+    const params = new URLSearchParams(window.location.search);
+    const p = params.get('p') || params.get('route') || params.get('path');
+    if (p) {
+      return p.startsWith('/') ? p : '/' + p;
+    }
+    return '/';
+  };
+
+  const [currentPath, setCurrentPath] = useState<string>(getNormalizedPath);
 
   React.useEffect(() => {
     const handlePopState = () => {
-      setCurrentPath(window.location.pathname);
+      setCurrentPath(getNormalizedPath());
     };
     window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    window.addEventListener('hashchange', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('hashchange', handlePopState);
+    };
   }, []);
 
   const navigateTo = (path: string) => {
@@ -323,11 +347,11 @@ export default function App() {
     }
   };
 
-  if (currentPath === '/check') {
+  if (currentPath === '/check' || currentPath.startsWith('/check') || currentPath.startsWith('check')) {
     return <PolicyView onBack={() => navigateTo('/')} />;
   }
 
-  if (currentPath === '/settings/remove' || currentPath === '/settings/remove/' || currentPath === '/settings-remove') {
+  if (currentPath === '/settings/remove' || currentPath.startsWith('/settings/remove') || currentPath.startsWith('/settings-remove') || currentPath.startsWith('settings/remove')) {
     return <RemoveAccountView onBack={() => navigateTo('/')} />;
   }
 
